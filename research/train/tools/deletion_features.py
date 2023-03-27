@@ -1,12 +1,6 @@
 import numpy as np
 
-def make_missing_value(data, missing_ratio):
-    # искусственно создаем пропуски в данных, которые впоследствии будем заполнять
-    # выбираем случайный признак
-    
-    df = data.copy()
-
-    random_feature = np.random.choice(df.columns)
+def make_missing_value(df, missing_ratio, random_feature):
 
     # определяем количество пропусков
     num_missing = int(len(df) * missing_ratio)

@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
 def generate_results_metrics(data, all_methods):
     mean_absolute = []
     mean_squared = []
@@ -14,6 +15,6 @@ def generate_results_metrics(data, all_methods):
                           'r2_score': r2}
 
     df_result = pd.DataFrame(result_all_metrics,
-                             index=['Mean', 'Median', 'Min', 'Max', 'Interpolate', 'LinearRegression', 'KNNImputer',
+                             index=['Mean', 'Median', 'Min', 'Max', 'LinearRegression', 'KNNImputer',
                                     'DecisionTree', 'RandomForest', 'SVR', 'XGBRegressor', 'CatBoostRegressor'])
     return df_result
