@@ -14,7 +14,7 @@ def RandomForest_imputer(df):
 
     test = test.drop(col, axis=1)
 
-    model = RandomForestRegressor()
+    model = RandomForestRegressor(random_state = 42)
     model.fit(X_train, y_train)
 
     y_pred = model.predict(test)
