@@ -1,6 +1,8 @@
 import numpy as np
 
-def make_missing_value(df, missing_ratio, random_feature):
+def make_missing_value(df_copy, missing_ratio, random_feature):
+
+    df = df_copy.copy()
 
     # определяем количество пропусков
     num_missing = int(len(df) * missing_ratio)

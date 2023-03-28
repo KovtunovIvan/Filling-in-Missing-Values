@@ -15,6 +15,5 @@ def generate_results_metrics(data, all_methods):
                           'r2_score': r2}
 
     df_result = pd.DataFrame(result_all_metrics,
-                             index=['Mean', 'Median', 'Min', 'Max', 'LinearRegression', 'KNNImputer',
-                                    'DecisionTree', 'RandomForest', 'SVR', 'XGBRegressor', 'CatBoostRegressor'])
+                             index=['Mean', 'Median', 'Min', 'Max', 'Interpolate', 'LinearReg', 'KNNImputer', 'DecisionTree', 'RandomForest', 'SVM', 'XGBRegressor', 'CatBoostRegressor'])
     return df_result

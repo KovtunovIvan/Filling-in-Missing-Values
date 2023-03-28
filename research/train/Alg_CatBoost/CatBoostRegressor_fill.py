@@ -14,7 +14,7 @@ def CatBoostRegressor_imputer(df):
 
     test = test.drop(col, axis=1)
 
-    model = CatBoostRegressor()
+    model = CatBoostRegressor(silent = True)
     model.fit(X_train, y_train)
 
     y_pred = model.predict(test)
