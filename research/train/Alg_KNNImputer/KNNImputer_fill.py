@@ -1,5 +1,8 @@
 from sklearn.impute import KNNImputer
 import pandas as pd
+import random
+
+random.seed(42)
 
 def KNNImputer_fill(df):
 

@@ -1,5 +1,8 @@
 from sklearn.tree import DecisionTreeRegressor
 import pandas as pd
+import random
+
+random.seed(42)
 
 def DecisionTree_imputer(df):
     col = df.loc[:, df.isna().sum() > 0].columns[0]
@@ -14,7 +17,7 @@ def DecisionTree_imputer(df):
 
     test = test.drop(col, axis=1)
 
-    model = DecisionTreeRegressor(random_state = 42)
+    model = DecisionTreeRegressor()
     model.fit(X_train, y_train)
 
     y_pred = model.predict(test)

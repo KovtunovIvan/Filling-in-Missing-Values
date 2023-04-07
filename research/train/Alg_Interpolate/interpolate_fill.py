@@ -1,5 +1,8 @@
-def interpolate_fill(df):
+import random
 
+random.seed(42)
+
+def interpolate_fill(df):
 
     df_interpolate_fill = df.copy()
 

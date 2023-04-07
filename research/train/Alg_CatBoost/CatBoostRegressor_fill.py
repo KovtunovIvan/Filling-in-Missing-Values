@@ -1,5 +1,8 @@
 from catboost import CatBoostRegressor
 import pandas as pd
+import random
+
+random.seed(42)
 
 def CatBoostRegressor_imputer(df):
     col = df.loc[:, df.isna().sum() > 0].columns[0]
@@ -14,7 +17,7 @@ def CatBoostRegressor_imputer(df):
 
     test = test.drop(col, axis=1)
 
-    model = CatBoostRegressor(random_state = 42, silent = True)
+    model = CatBoostRegressor(silent = True)
     model.fit(X_train, y_train)
 
     y_pred = model.predict(test)

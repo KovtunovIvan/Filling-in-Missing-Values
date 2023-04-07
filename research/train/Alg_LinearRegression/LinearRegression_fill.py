@@ -1,5 +1,8 @@
 from sklearn.linear_model import LinearRegression
 import pandas as pd
+import random
+
+random.seed(42)
 
 def linreg_imputer(df):
     col = df.loc[:, df.isna().sum() > 0].columns[0]

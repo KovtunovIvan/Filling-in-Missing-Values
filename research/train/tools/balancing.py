@@ -1,5 +1,9 @@
 import numpy as np
 import pandas as pd
+import random
+
+np.random.seed(42)
+random.seed(42)
 
 def data_balancing(df, column):
     from imblearn.over_sampling import SMOTE

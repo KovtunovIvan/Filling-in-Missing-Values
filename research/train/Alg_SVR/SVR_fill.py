@@ -1,5 +1,8 @@
 from sklearn.svm import SVR
 import pandas as pd
+import random
+
+random.seed(42)
 
 def SVM_imputer(df):
     col = df.loc[:, df.isna().sum() > 0].columns[0]
