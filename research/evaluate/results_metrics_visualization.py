@@ -17,6 +17,7 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
 
     plt.xticks(x, list(methods.keys()), rotation=90)
     plt.legend()
+    plt.grid()
     plt.show()
 
     #####################################################################
@@ -30,6 +31,7 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
 
     plt.xticks(x, list(methods.keys()), rotation=90)
     plt.legend()
+    plt.grid()
     plt.show()
     #####################################################################
     dict_graf = df20_result.to_dict()
@@ -42,6 +44,7 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
 
     plt.xticks(x, list(methods.keys()), rotation=90)
     plt.legend()
+    plt.grid()
     plt.show()
     #####################################################################
 
@@ -77,6 +80,7 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
     ax.legend()
 
     # Показываем график
+    #plt.grid()
     plt.show()
     #####################################################################
 
@@ -110,7 +114,7 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
     #####################################################################
 
     # создаем датафрейм на основе словаря
-    df = data
+    """df = data
 
     # устанавливаем 'Method' в качестве индекса
     df.set_index('Method', inplace=True)
@@ -122,7 +126,7 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
     plt.title('MAE для различных методов и процентов пропусков')
 
     # показываем график
-    plt.show()
+    plt.show()"""
 
     #####################################################################
     # создаем датафрейм на основе словаря
@@ -164,11 +168,12 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
     plt.title('MAE для различных методов и процентов пропусков')
 
     # показываем график
+    #plt.grid()
     plt.show()
     #####################################################################
 
     # создаем датафрейм из словаря
-    df = data.reset_index()
+    """df = data.reset_index()
 
     # создаем фигуру
     fig = plt.figure()
@@ -195,16 +200,17 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
     ax.set_yticks(y)
 
     # показываем график
-    plt.show()
+    plt.show()"""
     #####################################################################
     plt.plot(df1_result['r2_score'], )
     plt.plot(df15_result['r2_score'])
     plt.plot(df20_result['r2_score'])
     plt.legend(['0.05', '0.20', '0.35'], bbox_to_anchor=(1, 1))
     plt.xticks(rotation=60)
+    plt.grid()
     plt.show()
     #####################################################################
-    fig, ax = plt.subplots()
+    """fig, ax = plt.subplots()
     x = df1_result['Mean_absolute_error'].index
     ax.bar(x, df20_result['Mean_absolute_error'], label='35%')
     ax.bar(x, df15_result['Mean_absolute_error'], label='20%')
@@ -215,15 +221,15 @@ def visualization_results_metrics(df1_result, df15_result, df20_result):
     fig.set_figwidth(20)
     fig.set_figheight(6)
 
-    plt.show()
+    plt.show()"""
     #####################################################################
     missing_frac_range = [0.05, 0.20, 0.35]
-    leg = df1_result['r2_score'].sort_values().index
-    res5 = df1_result['r2_score'].sort_values()
-    res20 = df15_result['r2_score'].reindex(res5.index)
-    res35 = df20_result['r2_score'].reindex(res5.index)
+    leg = df1_result['r2_score'].index  
+    res5 = df1_result['r2_score']
+    res20 = df15_result['r2_score']
+    res35 = df20_result['r2_score']
 
     plt.plot(missing_frac_range, [res5, res20, res35])
     plt.legend(leg, bbox_to_anchor=(1, 1))
-
+    plt.grid()
     plt.show()
