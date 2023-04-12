@@ -1,7 +1,8 @@
 import pandas as pd
 import random
-
+import numpy as np
 random.seed(42)
+np.random.seed(42)
 
 def mean_fill(df):
     col_missing = df.loc[:, df.isna().sum() > 0]

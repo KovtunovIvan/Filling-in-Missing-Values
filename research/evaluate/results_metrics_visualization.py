@@ -6,6 +6,10 @@ import numpy as np
 import plotly.graph_objs as go
 import seaborn as sns
 
+import random
+random.seed(42)
+np.random.seed(42)
+
 def visualization_results_metrics(df1_result, df15_result, df20_result):
     dict_graf = df1_result.to_dict()
     plt.figure(figsize=(10, 6))

@@ -1,8 +1,9 @@
 from sklearn.impute import KNNImputer
 import pandas as pd
 import random
-
+import numpy as np
 random.seed(42)
+np.random.seed(42)
 
 def KNNImputer_fill(df):
 

@@ -1,8 +1,9 @@
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import random
-
+import numpay as np
 random.seed(42)
+np.random.seed(42)
 
 def generate_results_metrics(data, all_methods):
     mean_absolute = []
