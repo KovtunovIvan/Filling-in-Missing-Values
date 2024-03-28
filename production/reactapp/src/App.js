@@ -1,0 +1,184 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+
+import './theme/App.css';
+
+import { userCheck } from "./api/userApi"
+import { setUser } from "./redux/userData";
+import { LocalStorageTools } from "./localStorage";
+
+import { PrivateRoute } from "./routes/PrivateRoute";
+import { GuestRoute } from "./routes/GuestRoute";
+
+import { MainLayout } from './components/MainLayout';
+import { AppLayout } from './components/AppLayout';
+
+import { Root } from './pages/root/Root';
+import { Contacts } from './pages/platform/Contacts';
+import { Guide } from './pages/platform/Guide';
+import { Feedback } from './pages/platform/Feedback';
+import { PresentationOrder } from './pages/platform/PresentationOrder';
+import { LogIn } from './pages/u/LogIn';
+import { Registration } from './pages/u/Registration';
+import { Demo } from './pages/platform/Demo';
+import { CreateProject } from './pages/app/CreateProject';
+import { AllProjects } from "./pages/app/AllProjects";
+import { Settings } from "./pages/app/Settings";
+import { PasswordResore } from "./pages/u/PasswordRestore";
+import { Profile } from "./pages/app/Profile";
+import { Project } from "./pages/app/Project";
+
+import ErrorPage from './components/ErrorPage';
+
+function App() {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.userData.username);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const tokens = LocalStorageTools.getItemFromLocalStorage('tokens')
+        const userInfo = tokens ? jwtDecode(tokens.access) : null;
+        if (userInfo) {
+          userCheck(userInfo.user_id).then((response) => {
+            dispatch(setUser(response?.data))
+          })
+        }
+      } catch (err) {
+        console.log(`Error! Unable to check tokens! ${err}`);
+      }
+    })()
+  }, [])
+
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Root/>,
+    },
+    {
+      path:"/platform",
+      element: <MainLayout/>,
+      errorElement: <ErrorPage/>,
+      children: [
+        {
+          index:true,
+          path:"contacts",
+          element:<Contacts/>,
+        },
+        {
+          path:"guide",
+          element:<Guide/>,
+        },
+        {
+          path:"feedback",
+          element:<Feedback/>,
+        },
+        {
+          path:"presentation",
+          element:<PresentationOrder/>,
+        },
+        {
+          path:"demo",
+          element:<Demo/>,
+        },
+      ]
+    },
+    {
+      path: "/u",
+      element: (
+      <GuestRoute user={user}>
+        <MainLayout/>
+      </GuestRoute>
+      ),
+      errorElement: <ErrorPage/>,
+      children: [
+        {
+          path:"login",
+          element:<LogIn/>,
+        },
+        {
+          path:"reg",
+          element:<Registration/>,
+        },
+        {
+          path:"pass",
+          element:<PasswordResore/>,
+        },
+      ]
+    },
+    {
+      path:"/app",
+      errorElement: <ErrorPage/>,
+      element:(
+        <PrivateRoute user={user}>
+          <AppLayout/>
+        </PrivateRoute>
+      ),
+      children: [
+        {
+          index: true,
+          element:<CreateProject/>,
+        },
+        {
+          path:"projects",
+          element:<AllProjects/>,
+        },
+        {
+          path:"projects/:id",
+          element:<Project/>,
+        },
+        {
+          path:"profile",
+          element:<Profile/>,
+        },
+        {
+          path:"settings",
+          element:<Settings/>,
+        },
+      ]
+    }
+  ])
+
+  /*
+  const router2 = createBrowserRouter(
+    createRoutesFromElements(
+        <Route path='/' element={<Outlet/>} >
+          <Route errorElement={<ErrorPage/>}/>
+          <Route index element={<Root/>}/>
+          <Route path='platform/' element={<MainLayout/>}>
+            <Route path='contacts' element={<Contacts/>} />
+            <Route path='guide' element={<Guide/>} />
+            <Route path='feedback' element={<Feedback/>} />
+            <Route path='presentation' element={<PresentationOrder/>} />
+            <Route path='demo' element={<Demo/>} />
+          </Route>
+          <Route 
+            path='u/' 
+            element={<GuestRoute user={user}><MainLayout/></GuestRoute>}>
+            <Route path='login' element={<LogIn/>}/>
+            <Route path='pass' element={ <PasswordResore/> }/>
+            <Route path='reg' element={<Registration/>} />
+          </Route>
+          <Route 
+            path='app/'
+            element={<PrivateRoute user={user}><AppLayout/></PrivateRoute>}>
+            <Route index element={<CreateProject/>}/>
+            <Route path='projects' element={<AllProjects/>} />
+            <Route path='projects/:id' element={<Settings/>} />
+            <Route path='settings' element={<Settings/>} />
+          </Route> 
+        </Route>
+    )
+  );
+  */
+
+
+  return (
+      <RouterProvider router={router} />
+  );
+}
+
+
+export default App;
