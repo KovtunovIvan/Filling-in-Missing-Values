@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import User
 from django.contrib.auth import authenticate
+from .models import Project
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -33,3 +34,7 @@ class LoginSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Incorrect Credentials")
     
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'title', 'description', 'user']

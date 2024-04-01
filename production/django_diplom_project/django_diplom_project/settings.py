@@ -133,7 +133,7 @@ SIMPLE_JWT = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "todo_app",
+        "NAME": "web_app",
         "USER": "diplom_user",
         "PASSWORD": "diplom123",
         "HOST": "127.0.0.1",

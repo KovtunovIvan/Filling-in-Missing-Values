@@ -49,3 +49,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"hello"
+
+class Project(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title

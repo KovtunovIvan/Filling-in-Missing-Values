@@ -6,6 +6,10 @@ from rest_framework.response import Response
 import json
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
+from rest_framework.decorators import api_view, permission_classes
+from .forms import ProjectForm
+from .models import Project
+from .serializers import ProjectSerializer
 
 
 from .serializers import (
@@ -63,11 +67,9 @@ class IdGetUser(GenericAPIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-
 class UserLogoutAPIView(GenericAPIView):
 
     permission_classes = (IsAuthenticated,)
-
     def post(self, request, *args, **kwargs):
         try:
             refresh_token = request.data["refresh"]
@@ -88,3 +90,22 @@ class UserAPIView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  
+def create_project(request):
+    if request.method == 'POST':
+        form = ProjectForm(request.data)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.user = request.user
+            project.save()
+            return Response({'success': True, 'message': 'Project created successfully!'}, status=status.HTTP_201_CREATED)
+        return Response({'success': False, 'message': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  
+def list_projects(request):
+    projects = Project.objects.all()
+    serializer = ProjectSerializer(projects, many=True)
+    return Response(serializer.data)
