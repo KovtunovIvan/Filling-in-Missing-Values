@@ -16,13 +16,13 @@ export const login = async (email, password, dispatch) => {
   
 export const logout = (refreshToken) => {
   const auth = authHeader();
+  
   LocalStorageTools.removeFromLocalStorage('tokens');
   return instance.post("logout/", {
-      headers: auth,
-      data: {
-        refresh: refreshToken,
-      }
-  })
+    refresh: refreshToken,
+  }, {
+    headers: auth,
+  });
 }
 
 export const userCheck = (id) => {
