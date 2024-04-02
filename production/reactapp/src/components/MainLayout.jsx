@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
+import { ScrollRestoration } from "react-router-dom";
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { useLocation, Navigate } from "react-router-dom";
+
 
 function MainLayout() {
     let location = useLocation();
@@ -11,9 +13,14 @@ function MainLayout() {
     
     return (
         <>
-            <Header/>
-            <Outlet/>
-            <Footer/>
+            <div className="main-container">
+                <div className="content">
+                    <Header/>
+                    <Outlet/>
+                </div>
+                <Footer className="footer-container"/>
+            </div>   
+            <ScrollRestoration/>     
         </>
     )
 }

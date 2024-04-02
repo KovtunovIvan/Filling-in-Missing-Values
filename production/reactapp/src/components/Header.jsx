@@ -3,10 +3,14 @@ import { Link } from 'react-router-dom';
 
 function Header() {
     return (
-        <div className='header-back'>
-            <div className='container header-nav'>
+        <div className='header-wrapper'>
+            <div className='wrapper header-nav'>
                 <Link to='/' className='header-logo'>
-                    <img src={logo} height="60" alt="logo" />
+                    <img 
+                        src={logo} 
+                        height="60" 
+                        alt="logo" 
+                    />
                 </Link>
                 <Navbar/>
             </div>
@@ -16,20 +20,20 @@ function Header() {
 
 function Navbar() {
     return (
-        <div className='header-navbar'>
-            <Link to='/' className='header-navitem'>
+        <div className='header__navbar'>
+            <Link to='/' className='header__navitem'>
                 О сервисе
             </Link>
-            <Link to='/platform/guide' className='header-navitem'>
+            <Link to='/platform/guide' className='header__navitem'>
                 Документация
             </Link>
-            <Link to='/platform/contacts' className='header-navitem'>
+            <Link to='/platform/contacts' className='header__navitem'>
                 Контакты
             </Link>
-            <Link to='/platform/demo' className='header-navitem'>
+            <Link to='/platform/demo' className='header__navitem'>
                 ДЕМО
             </Link>
-            <Link to='/u/login' className='header-navitem'>
+            <Link to='/u/login' className='header__navitem header__navitem_login'>
                 ВОЙТИ
             </Link>
         </div>
