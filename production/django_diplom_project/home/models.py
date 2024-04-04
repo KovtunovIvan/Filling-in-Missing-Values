@@ -54,6 +54,5 @@ class Project(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.title
+    original_csv_file = models.FileField(upload_to='original_csv_files/', default='', null=True, blank=True) 
+    processed_csv_file = models.FileField(upload_to='processed_csv_files/', default='', null=True, blank=True)

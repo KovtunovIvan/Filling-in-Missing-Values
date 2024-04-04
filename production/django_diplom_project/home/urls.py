@@ -22,4 +22,6 @@ urlpatterns = [
     path("idUserCheck/", IdGetUser.as_view(), name="get-user-by-token"),
     path('AllProjects/', views.list_projects, name='list-projects'),
     path('Project/', views.create_project, name='create-project'),
+    path('fill-missing-values/<int:project_id>/<int:method_id>/', views.fill_missing_values, name='fill-missing-values'),
+
 ]
