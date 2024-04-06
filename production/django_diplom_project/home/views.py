@@ -33,6 +33,8 @@ import numpy as np
 from io import BytesIO
 from .encoder import data_encoding
 from django.db.models import Count
+import re
+import os
 
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer
@@ -120,17 +122,19 @@ def list_projects(request):
     serializer = ProjectSerializer(projects, many=True)
     return Response(serializer.data)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])  
-def create_project(request):
-    if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES)
-        if form.is_valid():
-            project = form.save(commit=False)
-            project.user = request.user
-            project.save()
-            return Response({'success': True, 'message': 'Project created successfully!'}, status=status.HTTP_201_CREATED)
-        return Response({'success': False, 'message': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def get_project(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
+        serializer = ProjectSerializer(project)
+        data = serializer.data
+        # Добавляем ссылки на загруженный и обработанный файлы
+        data["original_csv_file_url"] = project.original_csv_file.url if project.original_csv_file else None
+        data["processed_csv_file_url"] = project.processed_csv_file.url if project.processed_csv_file else None
+        return Response(data, status=status.HTTP_200_OK)
+    except Project.DoesNotExist:
+        return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])  
@@ -141,17 +145,27 @@ def upload_file(request):
         
         uploaded_file = request.FILES['file']
         
-        existing_projects_count = Project.objects.filter(title=uploaded_file.name).count()
+        # Получаем базовое имя файла (без расширения)
+        base_name, ext = os.path.splitext(uploaded_file.name)
         
-        if existing_projects_count > 0:
-            title = f"{uploaded_file.name} ({existing_projects_count + 1})"
+        # Если имя файла уже содержит скобки и номер внутри, увеличиваем номер
+        if re.match(r"^(.*)\s\((\d+)\)$", base_name):
+            match = re.match(r"^(.*)\s\((\d+)\)$", base_name)
+            base_name = match.group(1)
+            existing_projects_count = int(match.group(2))
         else:
-            title = uploaded_file.name
-        
+            existing_projects_count = Project.objects.filter(title__startswith=base_name).count()
+
+        # Создаем уникальное имя проекта с номером
+        title = f"{base_name} ({existing_projects_count + 1})"
+
+        # Создаем проект и сохраняем файл
         project = Project.objects.create(title=title, user=request.user)
         project.original_csv_file = uploaded_file
+        project.original_csv_file.name = f'{title}.csv'
         project.save()
-        
+        print(title)
+
         return Response({'success': True, 'message': 'Project created successfully!'}, status=status.HTTP_201_CREATED)
 
 
@@ -161,6 +175,8 @@ def upload_file(request):
 def process_data(request, project_id, method_fill_id, method_scaling_id):
     # Получаем объект проекта по его идентификатору
     project = Project.objects.get(pk=project_id)
+
+    title = project.title
 
     # Получаем файл CSV из объекта проекта
     original_csv_file = project.original_csv_file
@@ -195,9 +211,9 @@ def process_data(request, project_id, method_fill_id, method_scaling_id):
     buffer.write(result_df.encode())
 
     # Сохраняем обработанный файл в объекте проекта
-    project.processed_csv_file.save(f'processed_data_{all_methods_names[method_fill_id]}.csv', buffer)
+    project.processed_csv_file.save(f'{title}_{all_methods_names[method_fill_id]}.csv', buffer)
 
     # Возвращаем созданный файл в ответе
     response = HttpResponse(result_df, content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=f"processed_data_{all_methods_names[method_id]}.csv"'
+    response['Content-Disposition'] = 'attachment; filename=f"{title}_{all_methods_names[method_fill_id]}.csv"'
     return response

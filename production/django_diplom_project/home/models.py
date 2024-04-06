@@ -6,7 +6,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 import os
 
-
 class CustomUserManager(BaseUserManager):
     """
     Custom user model manager where email is the unique identifier
@@ -61,23 +60,6 @@ class Project(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     original_csv_file = models.FileField(upload_to='original_csv_files/', default='', null=True, blank=True) 
     processed_csv_file = models.FileField(upload_to='processed_csv_files/', default='', null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.title:  # Проверяем, есть ли уже заголовок проекта
-            # Получаем имя загруженного файла
-            filename = os.path.basename(self.original_csv_file.name)
-            base_name, ext = os.path.splitext(filename)
-            title = base_name
-
-            # Проверяем, есть ли уже проект с таким же названием файла
-            existing_projects = Project.objects.filter(title=title)
-            if existing_projects.exists():
-                # Если есть, добавляем порядковый номер
-                title = f"{base_name}_{existing_projects.count() + 1}"
-
-            self.title = title
-
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title

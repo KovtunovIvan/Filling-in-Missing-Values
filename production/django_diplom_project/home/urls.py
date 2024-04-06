@@ -21,7 +21,7 @@ urlpatterns = [
     path("user/", UserAPIView.as_view(), name="user-info"),
     path("idUserCheck/", IdGetUser.as_view(), name="get-user-by-token"),
     path('AllProjects/', views.list_projects, name='list-projects'),
-    path('Project/', views.create_project, name='create-project'),
+    path('get-project/<int:project_id>/', views.get_project, name='get-project'),
     path('process-data/<int:project_id>/<int:method_fill_id>/<str:method_scaling_id>/', views.process_data, name='process-data'),
     path('upload-file/', views.upload_file, name='upload-file'),
 ]
