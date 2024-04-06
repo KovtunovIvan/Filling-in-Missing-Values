@@ -1,5 +1,5 @@
-import { Header } from '../../components/Header';
-import { Footer } from '../../components/Footer';
+import { Header } from '../../components/main/Header';
+import { Footer } from '../../components/main/Footer';
 
 function Root() {
     return (

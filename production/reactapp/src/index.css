@@ -1,5 +1,20 @@
 html, body {
   margin: 0;
-  max-height: 100%;
-  font-family:'Roboto flex';
+  height: 100%;
+  font-family: "Roboto Flex", sans-serif;
+  font-variation-settings:
+    "slnt" 0,
+    "wdth" 100,
+    "GRAD" 0,
+    "XOPQ" 96,
+    "XTRA" 468,
+    "YOPQ" 79,
+    "YTAS" 750,
+    "YTDE" -203,
+    "YTFI" 738,
+    "YTLC" 514,
+    "YTUC" 712;
+}
+.App {
+  height: 100%;
 }

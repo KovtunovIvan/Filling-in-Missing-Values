@@ -2,9 +2,9 @@ import { Link, useNavigate  } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
 import { register } from "../../api/userApi"
-import eyeOpen from "../../eye-open.svg"
-import eyeOff from "../../eye-off.svg"
-import line from "../../line-reg.svg"
+import eyeOpen from "../../theme/img/forms/eye-open.svg"
+import eyeOff from "../../theme/img/forms/eye-off.svg"
+import line from "../../theme/img/forms/line-reg.svg"
 
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 

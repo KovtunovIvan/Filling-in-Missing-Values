@@ -1,5 +1,11 @@
+import { ProjectList } from "../../components/app/ProjectList"
+
 function AllProjects() {
-    return <div>Список проектов</div>
+    return (
+        <>
+            <ProjectList />
+        </>
+    )
 }
 
 

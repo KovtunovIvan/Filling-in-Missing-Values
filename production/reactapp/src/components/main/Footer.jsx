@@ -1,4 +1,4 @@
-import logo from '../logo-white.svg';
+import logo from '../../theme/img/logo/logo-white.svg';
 import { Link } from 'react-router-dom';
 
 function Footer() {

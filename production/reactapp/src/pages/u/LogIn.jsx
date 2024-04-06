@@ -2,9 +2,9 @@ import { Link, useNavigate} from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { login } from "../../api/userApi"
-import eyeOpen from "../../eye-open.svg"
-import eyeOff from "../../eye-off.svg"
-import line from "../../line-login.svg"
+import eyeOpen from "../../theme/img/forms/eye-open.svg"
+import eyeOff from "../../theme/img/forms/eye-off.svg"
+import line from "../../theme/img/forms/line-login.svg"
 
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
@@ -181,7 +181,7 @@ function FormLogin() {
                     <div className='main-form__text'>
                         Нет аккаунта?
                     </div>
-                    <Link to='/u/reg' className='main-form__auth-link' >
+                    <Link to='/u/reg' className='main-form__auth-link' replace>
                         Зарегистрируйтесь
                     </Link>
                 </div>
@@ -239,7 +239,7 @@ function FormLogin() {
                 </div>
                 {(isDirty.password && errors.password) && <div className='main-form__error-message'>{errors.password}</div>}
                 <div className='main-form__bottom_space-between'>
-                    <Link to='/u/pass' className='main-form__pass-link'>
+                    <Link to='/u/pass' className='main-form__pass-link' replace>
                             Забыли пароль?
                     </Link>
                     <input 

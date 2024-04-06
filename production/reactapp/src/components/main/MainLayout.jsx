@@ -13,13 +13,11 @@ function MainLayout() {
     
     return (
         <>
-            <div className="main-container">
-                <div className="content">
-                    <Header/>
-                    <Outlet/>
-                </div>
-                <Footer className="footer-container"/>
-            </div>   
+            <div className="content">
+                <Header/>
+                <Outlet/>
+            </div>
+            <Footer className="footer-container"/>
             <ScrollRestoration/>     
         </>
     )

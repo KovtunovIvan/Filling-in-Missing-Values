@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
-import './theme/App.css';
+import './theme/styles/App.css';
 
 import { userCheck } from "./api/userApi"
 import { setUser } from "./redux/userData";
@@ -12,8 +12,8 @@ import { LocalStorageTools } from "./localStorage";
 import { PrivateRoute } from "./routes/PrivateRoute";
 import { GuestRoute } from "./routes/GuestRoute";
 
-import { MainLayout } from './components/MainLayout';
-import { AppLayout } from './components/AppLayout';
+import { MainLayout } from './components/main/MainLayout';
+import { AppLayout } from './components/app/AppLayout';
 
 import { Root } from './pages/root/Root';
 import { Contacts } from './pages/platform/Contacts';
