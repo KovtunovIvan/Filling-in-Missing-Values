@@ -24,6 +24,8 @@ from fill_methods.min_fill import min_fill
 from fill_methods.RandomForestRegressor_fill import RandomForest_imputer
 from fill_methods.SVR_fill import SVM_imputer
 from fill_methods.XGBRegressor_fill import XGBRegressor_imputer
+from scaling_methods.scaler_standart import scaling_standart
+from scaling_methods.scaler_normalize import normalization_scale
 import pandas as pd
 import random
 from io import StringIO
@@ -131,7 +133,7 @@ def list_projects(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])  
-def fill_missing_values(request, project_id, method_id):
+def process_data(request, project_id, method_fill_id, method_scaling_id):
     # Получаем объект проекта по его идентификатору
     project = Project.objects.get(pk=project_id)
 
@@ -151,21 +153,26 @@ def fill_missing_values(request, project_id, method_id):
               linreg_imputer(df_encoding), KNN_fill(df_encoding), DecisionTree_imputer(df_encoding),
               RandomForest_imputer(df_encoding), SVM_imputer(df_encoding), XGBRegressor_imputer(df_encoding), CatBoostRegressor_imputer(df_encoding)]
 
-    filled_df = all_methods[method_id]
+    filled_df = all_methods[method_fill_id]
+
+    if method_scaling_id == 'standart':
+        scale_df = scaling_standart(filled_df)
+    elif method_scaling_id == 'normalize':
+        scale_df = normalization_scale(filled_df)
 
     # Создаем новый файл CSV с заполненными значениями
-    filled_csv = filled_df.to_csv(index=False)
+    result_df = scale_df.to_csv(index=False)
 
     # Создаем временный объект BytesIO для сохранения данных в памяти
     buffer = BytesIO()
 
     # Записываем данные CSV в объект BytesIO
-    buffer.write(filled_csv.encode())
+    buffer.write(result_df.encode())
 
     # Сохраняем обработанный файл в объекте проекта
-    project.processed_csv_file.save(f'processed_data_{all_methods_names[method_id]}.csv', buffer)
+    project.processed_csv_file.save(f'processed_data_{all_methods_names[method_fill_id]}.csv', buffer)
 
     # Возвращаем созданный файл в ответе
-    response = HttpResponse(filled_csv, content_type='text/csv')
+    response = HttpResponse(result_df, content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=f"processed_data_{all_methods_names[method_id]}.csv"'
     return response
