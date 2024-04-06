@@ -34,7 +34,7 @@ import ErrorPage from './components/ErrorPage';
 
 function App() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.userData.username);
+  const user = useSelector((state) => state.userData.id);
 
   useEffect(() => {
     (async () => {
