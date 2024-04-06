@@ -23,4 +23,5 @@ urlpatterns = [
     path('AllProjects/', views.list_projects, name='list-projects'),
     path('Project/', views.create_project, name='create-project'),
     path('process-data/<int:project_id>/<int:method_fill_id>/<str:method_scaling_id>/', views.process_data, name='process-data'),
+    path('upload-file/', views.upload_file, name='upload-file'),
 ]

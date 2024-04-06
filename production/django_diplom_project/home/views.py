@@ -32,6 +32,7 @@ from io import StringIO
 import numpy as np
 from io import BytesIO
 from .encoder import data_encoding
+from django.db.models import Count
 
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer
@@ -112,6 +113,13 @@ class UserAPIView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  
+def list_projects(request):
+    projects = Project.objects.all()
+    serializer = ProjectSerializer(projects, many=True)
+    return Response(serializer.data)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])  
 def create_project(request):
@@ -124,12 +132,29 @@ def create_project(request):
             return Response({'success': True, 'message': 'Project created successfully!'}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'message': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])  
-def list_projects(request):
-    projects = Project.objects.all()
-    serializer = ProjectSerializer(projects, many=True)
-    return Response(serializer.data)
+def upload_file(request):
+    if request.method == 'POST':
+        if 'file' not in request.FILES:
+            return Response({'success': False, 'message': 'No file uploaded'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        uploaded_file = request.FILES['file']
+        
+        existing_projects_count = Project.objects.filter(title=uploaded_file.name).count()
+        
+        if existing_projects_count > 0:
+            title = f"{uploaded_file.name} ({existing_projects_count + 1})"
+        else:
+            title = uploaded_file.name
+        
+        project = Project.objects.create(title=title, user=request.user)
+        project.original_csv_file = uploaded_file
+        project.save()
+        
+        return Response({'success': True, 'message': 'Project created successfully!'}, status=status.HTTP_201_CREATED)
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])  
