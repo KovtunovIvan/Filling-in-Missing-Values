@@ -645,22 +645,40 @@ input::placeholder {
   grid-template-rows: repeat(3, 1fr);
   gap: 8px;
   grid-template-areas: 
-  "a a ." 
-  ". . ." 
-  ". . b";
+  "info info ." 
+  "info info ." 
+  ". . button";
 }
 
-.project-config__content__data__files {
-  grid-area: a;
+.project-config__content__data__info {
+  grid-area: info;
   align-self: center;
   justify-self: start;
   font-size: 0.9em;
 }
 
-.project-config__content__data__button {
-  grid-area: b;
-  align-self: end;
+.project-config__content__data__input-wrapper {
+  grid-area: button;
+  align-self:flex-end;
   justify-self: end;
+  width: 100%;
+  position: relative;
+  margin: 0px 0;
+  text-align: center;
+}
+
+.project-config__content__data__input {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+}
+
+.project-config__content__data__input-button__text {
+
+}
+
+.project-config__content__data__input-button {
+
 }
 
 .project-config__content_processing {

@@ -1,12 +1,12 @@
 import { ProcessingSettings } from "../../components/app/ProcessingSettings"
 import { Visualization } from "../../components/app/Visualization"
-import { ProjectConfig } from "../../components/app/ProjectConfiguration"
+import { ProjectCreate } from "../../components/app/ProjectCreate"
 
 function CreateProject() {
     return (
         <div className="project-config-container">
             <div className="project-config-wrapper">
-                <ProjectConfig />
+                <ProjectCreate />
                 <ProcessingSettings />
                 <Visualization />
             </div>

@@ -23,8 +23,8 @@ import { PresentationOrder } from './pages/platform/PresentationOrder';
 import { LogIn } from './pages/u/LogIn';
 import { Registration } from './pages/u/Registration';
 import { Demo } from './pages/platform/Demo';
-import { CreateProject } from './pages/app/CreateProject';
-import { AllProjects } from "./pages/app/AllProjects";
+import { CreateProject } from './pages/app/CreateNewProject';
+import { AllProjects, projectsLoader } from "./pages/app/AllProjects";
 import { Settings } from "./pages/app/Settings";
 import { PasswordResore } from "./pages/u/PasswordRestore";
 import { Profile } from "./pages/app/Profile";
@@ -124,6 +124,7 @@ function App() {
         {
           path:"projects",
           element:<AllProjects/>,
+          loader: projectsLoader,
         },
         {
           path:"projects/:id",

@@ -40,5 +40,21 @@ export const register = async (email, password, dispatch) => {
   });
   LocalStorageTools.setItemToLocalStorage("tokens", response.data.tokens);
   dispatch(setUser(response.data));
-  return response.data;;
+  return response.data;
+}
+
+export const getAllProjects = async () => {
+  const auth = authHeader();
+  const response = await instance.get("AllProjects/",{
+      headers: auth,
+    });
+  return response.data;
+}
+
+export const createNewProject = async (file) => {
+  const auth = authHeader();
+  const response = await instance.post("upload-file/", file, {
+      headers: auth,
+    });
+  return response.data;
 }

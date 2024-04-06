@@ -1,6 +1,6 @@
 import { ProjectListItem } from "./ProjectListItem"
 
-const data = [
+const test = [
     {
         id: 1,
         title: "project1.csv",
@@ -22,8 +22,11 @@ const data = [
         status: "error"
     },
 ]
-function ProjectList() {
 
+
+
+function ProjectList(props) {
+    const {data} = props;
     const list = data.map(x => {
         return <ProjectListItem id={x.id} title={x.title} status={x.status}/>
     })
