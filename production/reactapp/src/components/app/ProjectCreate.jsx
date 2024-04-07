@@ -3,6 +3,7 @@ import { createNewProject } from "../../api/userApi"
 import { useNavigate } from 'react-router-dom';
 
 const infoContent = "Описание допустимых форматов данных." 
+const acceptFiles = ".csv, .xlsx"
 
 function ProjectCreate() {
     const initialCreateState = {
@@ -71,6 +72,7 @@ function ProjectCreate() {
                     <input 
                         type="file" 
                         name="file"
+                        accept={acceptFiles}
                         id="input__file"
                         className='project-config__content__data__input'
                         onChange={handleUpload}
