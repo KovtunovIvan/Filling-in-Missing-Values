@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.conf.urls.static import static
 import os
 
 class CustomUserManager(BaseUserManager):
@@ -58,8 +59,8 @@ class User(AbstractUser):
 class Project(models.Model):
     title = models.CharField(max_length=100)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    original_csv_file = models.FileField(upload_to='original_csv_files/', default='', null=True, blank=True) 
-    processed_csv_file = models.FileField(upload_to='processed_csv_files/', default='', null=True, blank=True)
+    original_csv_file = models.FileField(upload_to=settings.ORIGINAL_CSV_FILES_DIR, default='', null=True, blank=True) 
+    processed_csv_file = models.FileField(upload_to=settings.PROCESSED_CSV_FILES_DIR, default='', null=True, blank=True)
 
     def __str__(self):
         return self.title

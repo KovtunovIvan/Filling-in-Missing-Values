@@ -1,6 +1,10 @@
 # from django.contrib import admin
 from . import views
-from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import path, include
+
 from .views import (
     LoginAPIView,
     RegistrationAPIView,
@@ -25,3 +29,6 @@ urlpatterns = [
     path('process-data/<int:project_id>/<int:method_fill_id>/<str:method_scaling_id>/', views.process_data, name='process-data'),
     path('upload-file/', views.upload_file, name='upload-file'),
 ]
+
+urlpatterns += static(settings.ORIGINAL_CSV_FILES_DIR, document_root=settings.ORIGINAL_CSV_FILES_DIR)
+urlpatterns += static(settings.PROCESSED_CSV_FILES_DIR, document_root=settings.PROCESSED_CSV_FILES_DIR)

@@ -181,4 +181,8 @@ STATIC_URL = "static/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField" 
+
+# Настройки для обработки загруженных файлов проектов
+ORIGINAL_CSV_FILES_DIR = 'original_csv_files/'  
+PROCESSED_CSV_FILES_DIR = 'processed_csv_files/'  
