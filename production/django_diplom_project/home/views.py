@@ -132,9 +132,13 @@ def get_project(request, project_id):
         # Добавляем ссылки на загруженный и обработанный файлы
         data["original_csv_file_url"] = project.original_csv_file.url if project.original_csv_file else None
         data["processed_csv_file_url"] = project.processed_csv_file.url if project.processed_csv_file else None
+        # Получаем только имена файлов без путей к директориям
+        data["original_csv_file_name"] = os.path.basename(project.original_csv_file.name) if project.original_csv_file else None
+        data["processed_csv_file_name"] = os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
         return Response(data, status=status.HTTP_200_OK)
     except Project.DoesNotExist:
         return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])  
