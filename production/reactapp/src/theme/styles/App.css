@@ -491,8 +491,9 @@ input::placeholder {
 
 .project-list-wrapper {
   display: flex;
-  flex-flow: column;
+  flex-direction: column-reverse;
   align-items: center;
+  order: -1;
   margin: 32px;
 }
 
