@@ -52,7 +52,7 @@ function Sidebar() {
                         >
                             <img 
                                 className='app-sidebar__navbar__item__icon'
-                                src={useMatch('/app/projects') ? progectsIconSolid : progectsIconDefault} 
+                                src={useMatch('/app/projects/*') ? progectsIconSolid : progectsIconDefault} 
                                 alt="icon"
                             />
                             <div className='app-sidebar__navbar__item__title' id = 'pro'>

@@ -22,13 +22,13 @@ const graficTypes = [
     },
 ]
 
-function Visualization() {
-    const disabled = true;
+function Visualization(props) {
+    const { disabled, } = props;
+
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeGraficID, setActiveGraficID] = useState(graficTypes[0].id);
 
-    const isActive = false;
-    const buttonStyle = isActive ? "button button_default vis-button" : "button button_disable vis-button" 
+    const buttonStyle = disabled ? "button button_disable" : "button button_default";
 
     const hendleSelector = (e) => {
         const id = e.target.id;
@@ -45,8 +45,6 @@ function Visualization() {
         setActiveGraficID(id)
     }
 
-    console.log(activeGraficID);
-    console.log(graficTypes[activeGraficID].title);
     return (
         <div className="project-config-inner-wrapper project-config-inner-wrapper_vis">
             <div className="project-config__title">
@@ -80,11 +78,21 @@ function Visualization() {
                                 activeID={activeGraficID} 
                             />
                     }
-                    <button 
-                        className={buttonStyle}
-                    >
-                        Скачать
-                    </button>
+
+                    {
+                        disabled ?                
+                            <button 
+                                className={buttonStyle}
+                                disabled
+                            >
+                                Скачать
+                            </button>
+                            :<button 
+                                className={buttonStyle}
+                            >
+                                Скачать
+                            </button>
+                    }
                 </div>
                 <div className='project-config__content_vis-result'>
                     <div className='project-config__content_vis-result__title'>

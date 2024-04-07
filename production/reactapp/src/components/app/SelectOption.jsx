@@ -4,7 +4,8 @@ function SelectOption(props) {
         return (
             <option 
                 className="select-option__select__option"
-                value={item.name}
+                name={item.name}
+                value={item.id}
                 key={item.id}
             >
                 {item.name}

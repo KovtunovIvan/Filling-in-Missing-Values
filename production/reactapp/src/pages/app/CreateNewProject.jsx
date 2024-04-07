@@ -7,8 +7,8 @@ function CreateProject() {
         <div className="project-config-container">
             <div className="project-config-wrapper">
                 <ProjectCreate />
-                <ProcessingSettings />
-                <Visualization />
+                <ProcessingSettings disabled={true}/>
+                <Visualization disabled={true}/>
             </div>
         </div>
     )

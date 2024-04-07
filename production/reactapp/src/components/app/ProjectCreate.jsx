@@ -40,8 +40,8 @@ function ProjectCreate() {
             let formData = new FormData();
             formData.append("file", selectedFile);
             createNewProject(formData).then(
-                () => { // (data --> id)
-                    navigate("/app/projects"); // navigate("/app/project/:id");
+                () => { 
+                    navigate(`/app/projects/`);
                 },
                 (error) => {
                     const resMessage =

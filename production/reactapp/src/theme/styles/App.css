@@ -142,6 +142,7 @@ padding-top: 6px;
 .button_default:hover, 
 .button_lite:hover {
   background-color: var(--default-hover-color);
+  transition: all 0.3s;
 }
 
 .button_dark-mode{
@@ -154,6 +155,7 @@ padding-top: 6px;
   background-color: var(--default-hover-color);
   border: none;
   padding: 15px 20px;
+  transition: all 0.3s;
 }
 
 .button_lite{
@@ -509,6 +511,7 @@ input::placeholder {
   box-shadow: 0px 2px 5px rgba(36, 35, 68, 0.4);
   width: 90%;
   min-width: 400px;
+  text-decoration: none;
 }
 
 .project-list__item:hover {
@@ -744,4 +747,72 @@ input::placeholder {
 
 .project-config__grafic-config {
   height: 310px;
+}
+
+.project-config__content__data__files {
+  display: grid;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
+  grid-template-areas: 
+  "switch switch ." 
+  "switch switch ." 
+  "switch switch button";
+}
+
+.project-config__content__data__files__switch {
+  grid-area: switch;
+  align-self: start;
+  justify-self: start;
+  display: grid;
+  margin-top: 8px;
+}
+.project-config__content__data__files__button {
+  grid-area: button;
+  align-self: end;
+  justify-self: end;
+}
+
+.project-config__content__data__files__switch__item {
+  background: none;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 8px;
+  color:var(--main-text-color);
+  cursor: pointer;
+}
+
+.project-config__content__data__files__switch__item:hover {
+  background: #daedfd;
+  transition: all 0.3s;
+}
+
+.project-config__content__data__files__switch__item_active {
+  background-color: var(--accent-color);
+  box-shadow: inset 0px 1px 5px #dee5ff;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 8px;
+  color:var(--main-text-color);
+  cursor: pointer;
+}
+.project-config__content__data__files__switch__item__type {
+  padding-right: 10px;
+  color: var(--main-text-color);
+  font-weight: 600;
+}
+
+.project-config__content__data__files__switch__item__name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: start;
+  width: 175px;
 }

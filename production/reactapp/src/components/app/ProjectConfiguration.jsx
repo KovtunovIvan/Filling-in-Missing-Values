@@ -1,39 +1,116 @@
-import infoIcon from "../../theme/img/forms/info-circle-icon.svg"
-import { createNewProject } from "../../api/userApi"
+function ProjectConfig(props) {
+    const {source, result, getter, setter} = props;
+    const fileNameSource = source.name;
+    const fileNameResult = result.name;
 
-function ProjectConfig() {
-    const sourceName = "file.csv"
-    const buttonName = "Выбрать"
+    const switchStyleActive = "project-config__content__data__files__switch__item_active"
+    const switchStyle = "project-config__content__data__files__switch__item"
 
-    const isFile = false;
-    const fileFildContent = isFile ? sourceName : "Описание допустимых форматов данных." 
+    const getSwitchState = () => {
+        if(result) {
+            return getter() === 1 ? {
+                        source: switchStyle,
+                        result: switchStyleActive,
+                    }
+                    : {
+                        source: switchStyleActive,
+                        result: switchStyle,
+                    }
 
-    function handleUpload() {
-        const selectedFile = document.getElementById("input").files[0];
-        let formData = new FormData();
-        formData.append("file", selectedFile);
-        createNewProject(formData)
-        console.log(formData)
+        } else {
+            return {
+                source: switchStyleActive,
+            }
+        }
     }
+    
+    const switchState = getSwitchState();
+    const handleChangeActive = (e) => {
+        setter(Number(e.target.id))
+    }
+
+    const DefaultSource = (
+        <button 
+            id="0"
+            className={switchState.source}
+            onClick={handleChangeActive}
+        >
+            <div 
+                id="0"
+                className="project-config__content__data__files__switch__item__type"
+            >
+                Source:
+            </div>
+            <div 
+                id="0"
+                className="project-config__content__data__files__switch__item__name"
+            >
+                {fileNameSource}
+            </div>       
+        </button>
+    )
+    const Switch = (
+        <>
+            <button 
+                id="0"
+                className={switchState.source}
+                onClick={handleChangeActive}
+            >
+                <div 
+                    id="0"
+                    className="project-config__content__data__files__switch__item__type"
+                >
+                   Source:
+                </div>
+                <div 
+                    id="0"
+                    className="project-config__content__data__files__switch__item__name"
+                >
+                    {fileNameSource}
+                </div>       
+            </button>
+
+            <button 
+                id="1"
+                className={switchState.result}
+                onClick={handleChangeActive}
+            >
+                <div
+                    id="1"
+                    className="project-config__content__data__files__switch__item__type"
+                >
+                    Result:
+                </div>
+                <div
+                    id="1"
+                    className="project-config__content__data__files__switch__item__name"
+                >
+                    {fileNameResult}
+                </div>                
+            </button>
+        </>
+    )
 
     return (
         <div className="project-config-inner-wrapper project-config-inner-wrapper_data">
             <div className="project-config__title">
                 Данные
             </div>
-            <div className="project-config__content project-config__content__data">
-                <div className="project-config__content__data__files">
-                    <div>{fileFildContent}</div>
+            <div className="project-config__content__data__files">
+                <div className="project-config__content__data__files__switch">
+                    {result ? 
+                        Switch 
+                        : DefaultSource
+                    }
                 </div>
-                <button onClick={handleUpload}
-                    className='button button_default project-config__right-button project-config__content__data__button'>
-                    {buttonName}
+                <button 
+                    className="project-config__content__data__files__button button button_default"
+                >
+                    Скачать
                 </button>
-                <input type="file" id="input"/>
             </div>
         </div>
     )
-
 }
 
 

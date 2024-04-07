@@ -28,14 +28,13 @@ import { AllProjects, projectsLoader } from "./pages/app/AllProjects";
 import { Settings } from "./pages/app/Settings";
 import { PasswordResore } from "./pages/u/PasswordRestore";
 import { Profile } from "./pages/app/Profile";
-import { Project } from "./pages/app/Project";
+import { OneProjectLoader, Project } from "./pages/app/Project";
 
 import ErrorPage from './components/ErrorPage';
+import { sendFormData } from "./components/app/ProcessingSettings";
 
 function App() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.userData.id);
-
   useEffect(() => {
     (async () => {
       try {
@@ -88,7 +87,7 @@ function App() {
     {
       path: "/u",
       element: (
-      <GuestRoute user={user}>
+      <GuestRoute>
         <MainLayout/>
       </GuestRoute>
       ),
@@ -112,13 +111,14 @@ function App() {
       path:"/app",
       errorElement: <ErrorPage/>,
       element:(
-        <PrivateRoute user={user}>
+        <PrivateRoute>
           <AppLayout/>
         </PrivateRoute>
       ),
       children: [
         {
-          index: true,
+          index:true,
+          path: "create",
           element:<CreateProject/>,
         },
         {
@@ -129,6 +129,8 @@ function App() {
         {
           path:"projects/:id",
           element:<Project/>,
+          loader: OneProjectLoader,
+          action: sendFormData,
         },
         {
           path:"profile",

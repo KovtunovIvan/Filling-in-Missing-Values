@@ -3,6 +3,7 @@ import iconReady from "../../theme/img/progect/status-ready.svg"
 import iconOk from "../../theme/img/progect/status-ok.svg"
 import iconError from "../../theme/img/progect/status-error.svg"
 import iconClock from "../../theme/img/progect/status-clock.svg"
+import { Link } from "react-router-dom"
 
 
 function ProjectListItem(props) {
@@ -35,7 +36,11 @@ function ProjectListItem(props) {
     }
 
     return (
-        <div className="project-list__item" key={id}>
+        <Link 
+            to={`/app/projects/${id}`}
+            className="project-list__item" 
+            key={id} 
+        >
             <div className="project-list__item__title">
                 {title}
             </div>
@@ -58,7 +63,7 @@ function ProjectListItem(props) {
                     />
                 </div>
             </div>
-        </div>
+        </Link>
     )
 
 }

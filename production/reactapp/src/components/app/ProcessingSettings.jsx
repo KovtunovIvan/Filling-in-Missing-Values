@@ -1,67 +1,75 @@
+import { sendDataForProcessing } from "../../api/userApi"
 import { SelectOption } from "./SelectOption";
+import {Form} from "react-router-dom"
 
-function ProcessingSettings() {
-    const isActive = false;
-    const buttonStyle = isActive ? "button button_default" : "button button_disable" 
+export const sendFormData = async ({request}) => {
+    let formData = await request.formData();
+    const response = await sendDataForProcessing(formData);
+    return response;
+} 
+
+function ProcessingSettings(props) {
+    const {disabled, id} = props;
+    const buttonStyle = disabled ? "button button_disable" : "button button_default";
 
     const fillMethods = [ 
         {
-            id: 1,
+            id: 0,
             name:"Mean",
         },
         {
-            id: 2,
+            id: 1,
             name:"Median", 
         },
         {
-            id: 3,
+            id: 2,
             name:"Min", 
         },
         {
-            id: 4,
+            id: 3,
             name:"Max", 
         },
         {
-            id: 5,
+            id: 4,
             name:"Interpol",
         },
         {
-            id: 6,
+            id: 5,
             name:"LinReg",
         },
         {
-            id: 7,
+            id: 6,
             name:"KNN",
         },
         {
-            id: 8,
+            id: 7,
             name:"DecTree",
         },
         {
-            id: 9,
+            id: 8,
             name:"Forest",
         },
         {
-            id: 10,
+            id: 9,
             name:"SVM",
         },
         {
-            id: 11,
+            id: 10,
             name:"XGBoost",
         },
         {
-            id: 12,
+            id: 11,
             name:"CatBoost",
         },      
     ]
 
     const scalingMathods = [
         {
-            id: 1,
+            id: 'standart',
             name:"Стандартизация",
         },   
         {
-            id: 2,
+            id: 'normalize',
             name:"Нормализация",
         },   
     ]
@@ -71,33 +79,47 @@ function ProcessingSettings() {
             <div className="project-config__title">
                 Обработка данных
             </div>
-            <div className="project-config__content project-config__content_processing">
-                <form className="project-config__content_form">
+            <Form 
+                action="/app/projects/:id"
+                method="post"
+                className="project-config__content project-config__content_processing">
+                <div className="project-config__content_form">
                     <SelectOption
                         label="Заполнение пропусков"
-                        name="fillMethods"
-                        id="fillMethods"
+                        name="method_fill_id"
+                        id="method_fill_id"
                         list={fillMethods}
-                        disabled={false}
+                        disabled={disabled}
                     />
                     <SelectOption
                         label="Масштабирование"
-                        name="scaling"
-                        id="scaling"
+                        name="method_scaling_id"
+                        id="method_scaling_id"
                         list={scalingMathods}
-                        disabled={false}
+                        disabled={disabled}
                     />
-                </form>
-                <button
-                    className={'project-config__right-button project-config__content_processing__button ' + buttonStyle}>
-                    Отправить
-                </button>
-            </div>
+                </div>
+                {
+                    disabled ? 
+                        <button
+                            className={'project-config__right-button project-config__content_processing__button ' + buttonStyle}
+                            disabled
+                        >
+                            Отправить
+                        </button>
+                        :<button
+                            type="submit"
+                            name="project_id"
+                            value={id}
+                            className={'project-config__right-button project-config__content_processing__button ' + buttonStyle}
+                        >
+                            Отправить
+                        </button>
+                }
+            </Form>
         </div>
     )
-
 }
-
 
 
 export {ProcessingSettings}
