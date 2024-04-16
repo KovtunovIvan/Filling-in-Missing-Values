@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
 from rest_framework.decorators import api_view, permission_classes
 from .forms import ProjectForm
-from .models import Project
+from .models import Project, Visualization
 from .serializers import ProjectSerializer
 from django.http import HttpResponse
 from .models import Project
@@ -39,6 +39,10 @@ from django.http import HttpResponse, Http404, FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import io
 
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer
@@ -261,3 +265,57 @@ def process_data(request, project_id, method_fill_id, method_scaling_id):
     response = HttpResponse(result_df, content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=f"{title}_{all_methods_names[method_fill_id]}.csv"'
     return response
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  
+def correlation_matrix_view(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
+        user_id = request.user.id
+        
+        # Проверяем, существует ли уже визуализация "Correlation Matrix" для этого проекта
+        visualization = Visualization.objects.filter(
+            project_id=project_id,
+            visualization_type='Correlation Matrix'
+        ).first()
+
+        if visualization:
+            # Если визуализация уже существует, возвращаем изображение из базы данных
+            with open(visualization.image_path, 'rb') as f:
+                image_data = f.read()
+            return HttpResponse(image_data, content_type='image/png')
+        
+        # Если визуализации не существует, продолжаем создавать корреляционную матрицу
+        file_path = project.processed_csv_file.path
+        df = pd.read_csv(file_path)
+        
+        corr_matrix = df.corr()
+
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=.5)
+        plt.title('Correlation Matrix')
+        
+        # Создаем папку для хранения графиков проекта, если она еще не существует
+        plot_dir = os.path.join('project_plots', 'correlation_matrices', str(user_id), str(project_id))
+        os.makedirs(plot_dir, exist_ok=True)
+
+        image_name = f"{os.path.splitext(os.path.basename(file_path))[0]}.png"
+        image_path = os.path.join(plot_dir, image_name)
+
+        plt.savefig(image_path)
+
+        # Сохраняем информацию о визуализации в базе данных
+        Visualization.objects.create(
+            project_id=project_id,
+            visualization_type='Correlation Matrix',
+            image_path=image_path
+        )
+
+        plt.clf()
+
+        with open(image_path, 'rb') as f:
+            image_data = f.read()
+        return HttpResponse(image_data, content_type='image/png')
+
+    except Project.DoesNotExist:
+        return HttpResponse("Project not found", status=404)

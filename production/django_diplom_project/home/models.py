@@ -64,3 +64,17 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+class Visualization(models.Model):
+    PROJECT_TYPES = [
+        ('Correlation Matrix', 'Correlation Matrix'),
+        ('Normal Distribution', 'Normal Distribution'),
+        ('Box Plot', 'Box Plot')
+    ]
+
+    project_id = models.IntegerField()
+    visualization_type = models.CharField(max_length=50, choices=PROJECT_TYPES)
+    image_path = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Visualization for Project {self.project_id} ({self.visualization_type})"
