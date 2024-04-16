@@ -35,6 +35,10 @@ from .encoder import data_encoding
 from django.db.models import Count
 import re
 import os
+from django.http import HttpResponse, Http404, FileResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer
@@ -127,18 +131,54 @@ def list_projects(request):
 def get_project(request, project_id):
     try:
         project = Project.objects.get(pk=project_id)
-        serializer = ProjectSerializer(project)
-        data = serializer.data
-        # Добавляем ссылки на загруженный и обработанный файлы
-        data["original_csv_file_url"] = project.original_csv_file.url if project.original_csv_file else None
-        data["processed_csv_file_url"] = project.processed_csv_file.url if project.processed_csv_file else None
-        # Получаем только имена файлов без путей к директориям
-        data["original_csv_file_name"] = os.path.basename(project.original_csv_file.name) if project.original_csv_file else None
-        data["processed_csv_file_name"] = os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
+        if not project:
+            return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        original_csv_file_url = f'http://127.0.0.1:8000/original-csv-file/{project_id}/'
+        processed_csv_file_url = f'http://127.0.0.1:8000/processed-csv-file/{project_id}/'
+        
+        data = {
+            "id": project.id,
+            "title": project.title,
+            "user": project.user.id,
+            "original_csv_file_url": original_csv_file_url if project.original_csv_file else None,
+            "processed_csv_file_url": processed_csv_file_url if project.processed_csv_file else None,
+            "original_csv_file_name": os.path.basename(project.original_csv_file.name) if project.original_csv_file else None,
+            "processed_csv_file_name": os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
+        }
+        
         return Response(data, status=status.HTTP_200_OK)
     except Project.DoesNotExist:
         return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def download_original_csv_file(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
+        if project.original_csv_file:
+            response = HttpResponse(project.original_csv_file, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{project.original_csv_file.name}"'
+            return response
+        else:
+            return HttpResponse("Original CSV file not found", status=404)
+    except Project.DoesNotExist:
+        return HttpResponse("Project not found", status=404)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def download_processed_csv_file(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
+        if project.processed_csv_file:
+            response = HttpResponse(project.processed_csv_file, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{project.processed_csv_file.name}"'
+            return response
+        else:
+            return HttpResponse("Processed CSV file not found", status=404)
+    except Project.DoesNotExist:
+        return HttpResponse("Project not found", status=404)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])  

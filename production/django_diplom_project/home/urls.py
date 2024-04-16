@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.urls import reverse
 
 from .views import (
     LoginAPIView,
@@ -28,6 +29,8 @@ urlpatterns = [
     path('get-project/<int:project_id>/', views.get_project, name='get-project'),
     path('process-data/<int:project_id>/<int:method_fill_id>/<str:method_scaling_id>/', views.process_data, name='process-data'),
     path('upload-file/', views.upload_file, name='upload-file'),
+    path('original-csv-file/<int:project_id>/', views.download_original_csv_file, name='original-csv-file-download'),
+    path('processed-csv-file/<int:project_id>/', views.download_processed_csv_file, name='processed-csv-file-download'),
 ]
 
 urlpatterns += static(settings.ORIGINAL_CSV_FILES_DIR, document_root=settings.ORIGINAL_CSV_FILES_DIR)
