@@ -29,8 +29,8 @@ urlpatterns = [
     path('get-project/<int:project_id>/', views.get_project, name='get-project'),
     path('process-data/<int:project_id>/<int:method_fill_id>/<str:method_scaling_id>/', views.process_data, name='process-data'),
     path('upload-file/', views.upload_file, name='upload-file'),
-    path('original-csv-file/<int:project_id>/', views.download_original_csv_file, name='original-csv-file-download'),
-    path('processed-csv-file/<int:project_id>/', views.download_processed_csv_file, name='processed-csv-file-download'),
+    #path('original-csv-file/<int:project_id>/', views.download_original_csv_file, name='original-csv-file-download'),
+    #path('processed-csv-file/<int:project_id>/', views.download_processed_csv_file, name='processed-csv-file-download'),
     path('correlation-matrix/<int:project_id>/', views.correlation_matrix_view, name='correlation-matrix'),
 ]
 

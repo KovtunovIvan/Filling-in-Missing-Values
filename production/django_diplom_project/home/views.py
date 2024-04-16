@@ -135,6 +135,23 @@ def list_projects(request):
 def get_project(request, project_id):
     try:
         project = Project.objects.get(pk=project_id)
+        serializer = ProjectSerializer(project)
+        data = serializer.data
+        # Добавляем ссылки на загруженный и обработанный файлы
+        data["original_csv_file_url"] = project.original_csv_file.url if project.original_csv_file else None
+        data["processed_csv_file_url"] = project.processed_csv_file.url if project.processed_csv_file else None
+        # Получаем только имена файлов без путей к директориям
+        data["original_csv_file_name"] = os.path.basename(project.original_csv_file.name) if project.original_csv_file else None
+        data["processed_csv_file_name"] = os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
+        return Response(data, status=status.HTTP_200_OK)
+    except Project.DoesNotExist:
+        return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+
+"""@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def get_project(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id)
         if not project:
             return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -182,7 +199,7 @@ def download_processed_csv_file(request, project_id):
         else:
             return HttpResponse("Processed CSV file not found", status=404)
     except Project.DoesNotExist:
-        return HttpResponse("Project not found", status=404)
+        return HttpResponse("Project not found", status=404)"""
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])  
@@ -318,4 +335,5 @@ def correlation_matrix_view(request, project_id):
         return HttpResponse(image_data, content_type='image/png')
 
     except Project.DoesNotExist:
+
         return HttpResponse("Project not found", status=404)
