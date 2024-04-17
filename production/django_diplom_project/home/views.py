@@ -478,3 +478,17 @@ def delete_avatar(request):
             return Response({'error': 'No avatar to delete'}, status=400)
     else:
         return Response({'error': 'Invalid request method'}, status=405)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request, old_password, new_password):
+    # Аутентифицируем пользователя
+    user = request.user
+    if not user.check_password(old_password):
+        return Response({"error": "Invalid old password."}, status=400)
+
+    # Устанавливаем новый пароль и сохраняем пользователя
+    user.set_password(new_password)
+    user.save()
+
+    return Response({"message": "Password has been changed successfully."}, status=200)
