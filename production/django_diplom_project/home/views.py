@@ -126,7 +126,8 @@ class UserAPIView(RetrieveUpdateAPIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])  
 def list_projects(request):
-    projects = Project.objects.all()
+    user = request.user  # Получаем текущего авторизованного пользователя
+    projects = Project.objects.filter(user=user)  # Фильтруем проекты по пользователю
     serializer = ProjectSerializer(projects, many=True)
     return Response(serializer.data)
 
@@ -143,6 +144,11 @@ def get_project(request, project_id):
         # Получаем только имена файлов без путей к директориям
         data["original_csv_file_name"] = os.path.basename(project.original_csv_file.name) if project.original_csv_file else None
         data["processed_csv_file_name"] = os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
+        # Получаем список признаков из обработанных данных
+        processed_data_path = project.processed_csv_file.path
+        df = pd.read_csv(processed_data_path)
+        features = list(df.columns)
+        data["features"] = features
         return Response(data, status=status.HTTP_200_OK)
     except Project.DoesNotExist:
         return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -290,19 +296,16 @@ def correlation_matrix_view(request, project_id):
         project = Project.objects.get(pk=project_id)
         user_id = request.user.id
         
-        # Проверяем, существует ли уже визуализация "Correlation Matrix" для этого проекта
         visualization = Visualization.objects.filter(
             project_id=project_id,
             visualization_type='Correlation Matrix'
         ).first()
 
         if visualization:
-            # Если визуализация уже существует, возвращаем изображение из базы данных
             with open(visualization.image_path, 'rb') as f:
                 image_data = f.read()
             return HttpResponse(image_data, content_type='image/png')
         
-        # Если визуализации не существует, продолжаем создавать корреляционную матрицу
         file_path = project.processed_csv_file.path
         df = pd.read_csv(file_path)
         
@@ -312,7 +315,6 @@ def correlation_matrix_view(request, project_id):
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=.5)
         plt.title('Correlation Matrix')
         
-        # Создаем папку для хранения графиков проекта, если она еще не существует
         plot_dir = os.path.join('project_plots', 'correlation_matrices', str(user_id), str(project_id))
         os.makedirs(plot_dir, exist_ok=True)
 
@@ -336,4 +338,108 @@ def correlation_matrix_view(request, project_id):
 
     except Project.DoesNotExist:
 
+        return HttpResponse("Project not found", status=404)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  
+def normal_distribution_view(request, project_id, feature_name):
+    try:
+        project = Project.objects.get(pk=project_id)
+        user_id = request.user.id
+        
+        visualization = Visualization.objects.filter(
+            project_id=project_id,
+            feature_name=feature_name,
+            visualization_type='Normal Distribution'
+        ).first()
+
+        if visualization:
+            with open(visualization.image_path, 'rb') as f:
+                image_data = f.read()
+            return HttpResponse(image_data, content_type='image/png')
+        
+        file_path = project.processed_csv_file.path
+        df = pd.read_csv(file_path)
+        
+        feature_data = df[feature_name]
+        
+        plt.figure(figsize=(10, 8))
+        sns.histplot(feature_data, kde=True, color='blue', bins=20)
+        plt.title(f'Normal Distribution of {feature_name}')
+        plt.xlabel(feature_name)
+        plt.ylabel('Frequency')
+        
+        plot_dir = os.path.join('project_plots', 'normal_distributions', str(user_id), str(project_id))
+        os.makedirs(plot_dir, exist_ok=True)
+
+        image_name = f"{feature_name}_normal_distribution.png"
+        image_path = os.path.join(plot_dir, image_name)
+
+        plt.savefig(image_path)
+
+        # Сохраняем информацию о визуализации в базе данных
+        Visualization.objects.create(
+            project_id=project_id,
+            feature_name=feature_name,
+            visualization_type='Normal Distribution',
+            image_path=image_path
+        )
+
+        plt.clf()
+
+        with open(image_path, 'rb') as f:
+            image_data = f.read()
+        return HttpResponse(image_data, content_type='image/png')
+
+    except Project.DoesNotExist:
+
+        return HttpResponse("Project not found", status=404)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  
+def box_plot_view(request, project_id, feature_name):
+    try:
+        project = Project.objects.get(pk=project_id)
+        user_id = request.user.id
+        
+        visualization = Visualization.objects.filter(
+            project_id=project_id,
+            visualization_type='Box Plot',
+            feature_name=feature_name
+        ).first()
+
+        if visualization:
+            with open(visualization.image_path, 'rb') as f:
+                image_data = f.read()
+            return HttpResponse(image_data, content_type='image/png')
+        
+        file_path = project.processed_csv_file.path
+        df = pd.read_csv(file_path)
+        
+        plt.figure(figsize=(10, 8))
+        sns.boxplot(x=feature_name, data=df)
+        plt.title(f'Box Plot for {feature_name}')
+        
+        plot_dir = os.path.join('project_plots', 'box_plots', str(user_id), str(project_id))
+        os.makedirs(plot_dir, exist_ok=True)
+
+        image_name = f"{os.path.splitext(os.path.basename(file_path))[0]}_{feature_name}_box_plot.png"
+        image_path = os.path.join(plot_dir, image_name)
+
+        plt.savefig(image_path)
+
+        Visualization.objects.create(
+            project_id=project_id,
+            visualization_type='Box Plot',
+            feature_name=feature_name,
+            image_path=image_path
+        )
+
+        plt.clf()
+
+        with open(image_path, 'rb') as f:
+            image_data = f.read()
+        return HttpResponse(image_data, content_type='image/png')
+
+    except Project.DoesNotExist:
         return HttpResponse("Project not found", status=404)

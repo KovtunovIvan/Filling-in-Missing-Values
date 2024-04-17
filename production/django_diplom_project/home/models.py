@@ -75,6 +75,7 @@ class Visualization(models.Model):
     project_id = models.IntegerField()
     visualization_type = models.CharField(max_length=50, choices=PROJECT_TYPES)
     image_path = models.CharField(max_length=255)
+    feature_name = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return f"Visualization for Project {self.project_id} ({self.visualization_type})"

@@ -32,6 +32,8 @@ urlpatterns = [
     #path('original-csv-file/<int:project_id>/', views.download_original_csv_file, name='original-csv-file-download'),
     #path('processed-csv-file/<int:project_id>/', views.download_processed_csv_file, name='processed-csv-file-download'),
     path('correlation-matrix/<int:project_id>/', views.correlation_matrix_view, name='correlation-matrix'),
+    path('normal-distribution/<int:project_id>/<str:feature_name>/', views.normal_distribution_view, name='normal_distribution'),
+    path('box-plot/<int:project_id>/<str:feature_name>/', views.box_plot_view, name='box_plot_view'),
 ]
 
 urlpatterns += static(settings.ORIGINAL_CSV_FILES_DIR, document_root=settings.ORIGINAL_CSV_FILES_DIR)
