@@ -466,21 +466,18 @@ def upload_avatar(request):
     else:
         return Response({'error': 'No avatar file provided'}, status=400)
 
-@api_view(['POST'])
+@api_view(['DELETE'])
 @permission_classes([IsAuthenticated]) 
 def delete_avatar(request):
-    if request.method == 'POST':
-        user = request.user
-        if user.avatar:
-            user.avatar.delete()
-            user.save()
-            return Response({'message': 'Avatar deleted successfully'})
-        else:
-            return Response({'error': 'No avatar to delete'}, status=400)
+    user = request.user
+    if user.avatar:
+        user.avatar.delete()
+        user.save()
+        return Response({'message': 'Avatar deleted successfully'})
     else:
-        return Response({'error': 'Invalid request method'}, status=405)
+        return Response({'error': 'No avatar to delete'}, status=400)
     
-@api_view(['POST'])
+@api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def change_password(request, old_password, new_password):
     # Аутентифицируем пользователя
@@ -494,7 +491,7 @@ def change_password(request, old_password, new_password):
 
     return Response({"message": "Password has been changed successfully."}, status=200)
 
-@api_view(['POST'])
+@api_view(['PUT'])
 @permission_classes([IsAuthenticated]) 
 def update_profile(request, first_name, last_name, middle_name, phone_number):
     user = request.user
@@ -506,7 +503,7 @@ def update_profile(request, first_name, last_name, middle_name, phone_number):
     return Response({"message": "Profile updated successfully"}, status=200)
 
 
-@api_view(['POST'])
+@api_view(['DELETE'])
 @permission_classes([IsAuthenticated]) 
 def delete_user_profile(request, password):
     user = request.user
