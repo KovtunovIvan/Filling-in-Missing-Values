@@ -492,3 +492,14 @@ def change_password(request, old_password, new_password):
     user.save()
 
     return Response({"message": "Password has been changed successfully."}, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
+def update_profile(request, first_name, last_name, middle_name, phone_number):
+    user = request.user
+    user.first_name = first_name
+    user.last_name = last_name
+    user.middle_name = middle_name
+    user.phone_number = phone_number
+    user.save()
+    return Response({"message": "Profile updated successfully"}, status=200)
