@@ -453,3 +453,28 @@ def box_plot_view(request, project_id, feature_name):
 
     except Project.DoesNotExist:
         return HttpResponse("Project not found", status=404)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
+def upload_avatar(request):
+    if request.method == 'POST' and request.FILES.get('avatar'):
+        user = request.user
+        user.avatar = request.FILES['avatar']
+        user.save()
+        return Response({'message': 'Avatar uploaded successfully'})
+    else:
+        return Response({'error': 'No avatar file provided'}, status=400)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
+def delete_avatar(request):
+    if request.method == 'POST':
+        user = request.user
+        if user.avatar:
+            user.avatar.delete()
+            user.save()
+            return Response({'message': 'Avatar deleted successfully'})
+        else:
+            return Response({'error': 'No avatar to delete'}, status=400)
+    else:
+        return Response({'error': 'Invalid request method'}, status=405)
