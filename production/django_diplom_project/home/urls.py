@@ -43,3 +43,4 @@ urlpatterns = [
 
 urlpatterns += static(settings.ORIGINAL_CSV_FILES_DIR, document_root=settings.ORIGINAL_CSV_FILES_DIR)
 urlpatterns += static(settings.PROCESSED_CSV_FILES_DIR, document_root=settings.PROCESSED_CSV_FILES_DIR)
+urlpatterns += static(settings.AVATARS_DIR, document_root=settings.AVATARS_DIR)

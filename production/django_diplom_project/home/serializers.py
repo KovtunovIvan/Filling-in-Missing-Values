@@ -5,10 +5,17 @@ from .models import Project
 
 
 class UserSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'middle_name', 'phone_number']
+        fields = ['id', 'email', 'first_name', 'last_name', 'middle_name', 'phone_number', 'avatar']
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            return obj.avatar.url
+        else:
+            return None
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
