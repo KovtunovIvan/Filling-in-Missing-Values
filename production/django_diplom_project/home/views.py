@@ -144,14 +144,24 @@ def get_project(request, project_id):
         # Получаем только имена файлов без путей к директориям
         data["original_csv_file_name"] = os.path.basename(project.original_csv_file.name) if project.original_csv_file else None
         data["processed_csv_file_name"] = os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
-        # Получаем список признаков из обработанных данных
-        processed_data_path = project.processed_csv_file.path
-        df = pd.read_csv(processed_data_path)
-        features = list(df.columns)
+        # Проверяем наличие файла на сервере и путь к файлу в базе данных
+        processed_data_path = None
+        if project.processed_csv_file and project.processed_csv_file.name:
+            processed_data_path = project.processed_csv_file.path
+        if processed_data_path and os.path.exists(processed_data_path):
+            # Если файл существует на сервере, читаем его и получаем список признаков
+            try:
+                df = pd.read_csv(processed_data_path)
+                features = list(df.columns)
+            except FileNotFoundError:
+                features = None
+        else:
+            features = None 
         data["features"] = features
         return Response(data, status=status.HTTP_200_OK)
     except Project.DoesNotExist:
         return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 """@api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
