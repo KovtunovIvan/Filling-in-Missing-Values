@@ -38,6 +38,7 @@ urlpatterns = [
     path('delete-avatar/', views.delete_avatar, name='delete_avatar'),
     path('change-password/<str:old_password>/<str:new_password>/', views.change_password, name='change_password'),
     path('update-profile/<str:first_name>/<str:last_name>/<str:middle_name>/<str:phone_number>/', views.update_profile, name='update_profile'),
+    path('delete-profile/<str:password>/', views.delete_user_profile, name='delete-user-profile'),
 ]
 
 urlpatterns += static(settings.ORIGINAL_CSV_FILES_DIR, document_root=settings.ORIGINAL_CSV_FILES_DIR)

@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from django.contrib.auth.hashers import check_password
 import json
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
@@ -503,3 +504,13 @@ def update_profile(request, first_name, last_name, middle_name, phone_number):
     user.phone_number = phone_number
     user.save()
     return Response({"message": "Profile updated successfully"}, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
+def delete_user_profile(request, password):
+    user = request.user
+    if not user.check_password(password):
+        return Response({'error': 'Invalid password'}, status=status.HTTP_400_BAD_REQUEST)
+    user.delete()
+    return Response({'message': 'User profile and related data deleted successfully'}, status=status.HTTP_200_OK)
