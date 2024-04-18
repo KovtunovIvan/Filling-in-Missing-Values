@@ -1,5 +1,6 @@
 import logo from '../../theme/img/logo/logo.svg';
 import { Link } from 'react-router-dom';
+import '../../theme/styles/header.css';
 
 function Header() {
     return (
@@ -24,7 +25,7 @@ function Navbar() {
             <Link to='/' className='header__navitem'>
                 О сервисе
             </Link>
-            <Link to='/platform/guide' className='header__navitem'>
+            <Link to='/platform/guide/0' className='header__navitem'>
                 Документация
             </Link>
             <Link to='/platform/contacts' className='header__navitem'>
