@@ -1,0 +1,29 @@
+.footer-wrapper{
+  background-image: url("../img/main/back.png");
+  padding: 10px 16px 10px 16px;
+  height: var(--footer-size);
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0px 20px 0px;
+}
+
+.footer-email {
+  color: white;
+  font-size: 1rem;
+  padding-bottom: 10px;
+}
+
+.footer-contacts {
+  color: white;
+}
+
+.footer-buttons{
+  display: grid;
+  grid-template-columns: 175px 230px;
+  gap: 10px;
+}

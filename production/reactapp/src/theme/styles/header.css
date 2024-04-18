@@ -1,0 +1,47 @@
+.header-wrapper {
+  position:relative;
+  z-index:2;
+  background-color:white;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  padding: 10px 16px 10px 16px;
+}
+
+.header-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header__navbar {
+  display: flex;
+}
+
+.header__navitem {
+  float: left;
+  color: var(--main-headline-color);
+  text-align: center;
+  padding: 14px;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 4px;
+  align-self: center;
+  font-weight: 500;
+}
+
+.header__navitem_login {
+  margin-left: 4px;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(to right, var(--accent-color), var(--default-color)) border-box;
+  border-radius: 50em;
+  border: 4px solid transparent;
+  padding: 8px 16px;
+}
+
+.header__navitem_login:hover {
+  background: linear-gradient(to right, var(--accent-color), var(--default-color)) padding-box,
+  linear-gradient(to right, var(--accent-color), var(--default-color)) border-box;
+  color: white;
+  border-radius: 50em;
+  transition: color 0.3s, transform 0.5s;
+}

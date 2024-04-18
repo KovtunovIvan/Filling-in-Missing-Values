@@ -1,9 +1,17 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
 import './theme/styles/App.css';
+import './theme/styles/guide.css';
+import './theme/styles/projects-list.css';
+import './theme/styles/project.css';
+import './theme/styles/main-form.css';
+import './theme/styles/app-sidebar.css';
+import './theme/styles/root.css';
+import './theme/styles/settings.css';
+import './theme/styles/profile.css';
 
 import { userCheck } from "./api/userApi"
 import { setUser } from "./redux/userData";
@@ -32,14 +40,21 @@ import { OneProjectLoader, Project } from "./pages/app/Project";
 
 import ErrorPage from './components/ErrorPage';
 import { sendFormData } from "./components/app/ProcessingSettings";
+import store from './redux/store';
+
+
+import {giudeChildrenRoutes} from "./pages/platform/Guide"
 
 function App() {
+  console.log("heloo")
+  console.log(store.getState())
   const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
       try {
         const tokens = LocalStorageTools.getItemFromLocalStorage('tokens')
         const userInfo = tokens ? jwtDecode(tokens.access) : null;
+        console.log(userInfo)
         if (userInfo) {
           userCheck(userInfo.user_id).then((response) => {
             dispatch(setUser(response?.data))
@@ -69,6 +84,7 @@ function App() {
         {
           path:"guide",
           element:<Guide/>,
+          children: giudeChildrenRoutes,
         },
         {
           path:"feedback",
