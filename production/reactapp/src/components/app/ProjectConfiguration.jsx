@@ -1,7 +1,7 @@
 function ProjectConfig(props) {
     const {source, result, getter, setter} = props;
     const fileNameSource = source.name;
-    const fileNameResult = result.name;
+    const fileNameResult = result ? result.name : null;
 
     const switchStyleActive = "project-config__content__data__files__switch__item_active"
     const switchStyle = "project-config__content__data__files__switch__item"

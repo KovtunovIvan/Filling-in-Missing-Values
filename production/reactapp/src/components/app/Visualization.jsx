@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SelectOption } from './SelectOption';
 import matrixIcon from "../../theme/img/visualization/matrix-icon.svg"
 import nornDistibutionIcon from "../../theme/img/visualization/norm-distribution-icon.svg"
@@ -24,7 +24,6 @@ const graficTypes = [
 
 function Visualization(props) {
     const { disabled, } = props;
-
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeGraficID, setActiveGraficID] = useState(graficTypes[0].id);
 
@@ -41,7 +40,7 @@ function Visualization(props) {
         }
         
     }
-    function handleChooseTypeByID(id){
+    function setterActiveID(id){
         setActiveGraficID(id)
     }
 
@@ -55,14 +54,22 @@ function Visualization(props) {
                     <div className="project-config__content__navigation">
                         <button 
                             id="0"
-                            className='project-config__content__navigation__item'
+                            className={
+                                activeIndex === 0 ?
+                                'project-config__content__navigation__item  project-config__content__navigation__item_active'
+                                :'project-config__content__navigation__item'
+                            }
                             onClick={hendleSelector}
                         >
                             Тип
                         </button>
                         <button
                             id="1"
-                            className='project-config__content__navigation__item'
+                            className={
+                                activeIndex === 1 ?
+                                'project-config__content__navigation__item project-config__content__navigation__item_active'
+                                :'project-config__content__navigation__item'
+                            }
                             onClick={hendleSelector}
                         >
                             Настройки
@@ -72,7 +79,7 @@ function Visualization(props) {
                         (activeIndex === 0) ?
                             <GraficTypeSelector 
                                 activeID={activeGraficID} 
-                                setter={handleChooseTypeByID}
+                                setter={setterActiveID}
                             />
                             : <GraficSettings
                                 activeID={activeGraficID} 
@@ -99,7 +106,7 @@ function Visualization(props) {
                         {graficTypes[activeGraficID].title}
                     </div>
                     <div className='project-config__content_vis-result__img-container'>
-                        <img src="#" alt="grafic" />
+                        <img id="image-g" alt="grafic" />
                     </div>
                 </div>
 
@@ -113,31 +120,13 @@ function Visualization(props) {
 function GraficTypeSelector(props) {
     const {activeID, setter} = props;
 
-    const handleChooseTypeByID = (e) => {
-        const id = e.target.id;
-        setter(id);
-    }
-
     const list = graficTypes.map((x) => {
-        const style = x.id === activeID ? "grafic-type-button_active" : "grafic-type-button";
         return (
-            <div id={x.id} className='' key={x.id}>
-                <button 
-                    id={x.id}
-                    className={style}
-                    onClick={handleChooseTypeByID}
-                >
-                    <img 
-                        id={x.id} 
-                        width={50}
-                        src={x.icon} 
-                        alt="icon" 
-                    />
-                    <div id={x.id}>
-                        {x.title}
-                    </div>
-                </button>
-            </div>
+            <GraphButton
+                graph={x}
+                activeID={activeID}
+                setter={setter}
+            />
         )
     })
 
@@ -148,6 +137,51 @@ function GraficTypeSelector(props) {
     )
 }
 
+function GraphButton(props) {
+    const {graph, activeID, setter} = props;
+
+    const [isActive, setIsActive] = useState(false);
+
+    const handleChooseTypeByID = (e) => {
+        setter(graph.id);
+    }
+
+    useEffect(()=> {
+        if(graph.id === activeID) {
+            setIsActive(true)
+        } else {
+            setIsActive(false)
+        }
+    }, [activeID])
+
+    console.log(graph.id);
+
+    return (
+        <div id={graph.id} className='' key={graph.id}>
+            <button 
+                id={graph.id}
+                className={
+                    isActive ?
+                    "grafic-type-button_active"
+                    : "grafic-type-button"
+                }
+                onClick={handleChooseTypeByID}
+            >
+                <img
+                    id={graph.id} 
+                    className='grafic-type-button__img'
+                    width={45}
+                    height={45}
+                    src={graph.icon} 
+                    alt="icon" 
+                />
+                <div id={graph.id}>
+                    {graph.title}
+                </div>
+            </button>
+        </div>
+    )
+}
 
 function GraficSettings(props) {
     const {activeID} = props;

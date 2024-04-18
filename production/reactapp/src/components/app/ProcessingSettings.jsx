@@ -1,9 +1,10 @@
 import { sendDataForProcessing } from "../../api/userApi"
 import { SelectOption } from "./SelectOption";
-import {Form} from "react-router-dom"
+import {Form, redirect} from "react-router-dom"
 
 export const sendFormData = async ({request}) => {
     let formData = await request.formData();
+    redirect("/app/projects");
     const response = await sendDataForProcessing(formData);
     return response;
 } 
