@@ -211,66 +211,36 @@ function FormReg() {
                     Авторизируйтесь
                 </Link>
             </div>
-            <label className='main-form__label'>
-                Email
-            </label>
-            <input
-                className= {
-                    !errors.email ? 
-                        'main-form__input'
-                        :'main-form__input main-form__input_error'}
-                type="text" 
-                name="email" 
-                placeholder='Введите email'
-                value={formData.email} 
-                onBlur={handleBlur}
-                onChange={handleChange}
-                />
-            {registerState.message ?
-                    (<div className='main-form__error-message'>{registerState.message}</div>)
-                    :((isDirty.email && errors.email) && <div className='main-form__error-message'>{errors.email}</div>)}
-            <label className='main-form__label'>
-                Пароль
-            </label>
-            <div 
-                tabIndex="0" 
-                className={
-                    !errors.password ?
-                    'main-form__password-fuild'
-                    : 'main-form__password-fuild main-form__input_error'
-                }
-            >
-            <input 
-                className='main-form__password-fuild__input'
-                type={
-                    isHiddenPassword?
-                    'password'
-                    :'text'
-                }
-                name="password" 
-                placeholder='Введите пароль'
-                value={formData.password} 
-                onBlur={handleBlur}
-                onChange={handleChange} 
-            />
-                <img 
-                    className='eye'
-                    src={
-                        isHiddenPassword?
-                        eyeOff
-                        : eyeOpen         
-                    } 
-                    onClick={handleHidePassword}
-                    alt="Hide the password"/>
-            </div>
-            {(isDirty.password && errors.password) && <div className='main-form__error-message'>{errors.password}</div>}
-            <label className='main-form__label'>
-                Повторите пароль
-            </label>
-            <div 
+            <div className='main-form__fuilds-wrapper'>
+
+                <label className='main-form__label'>
+                    Email
+                </label>
+                <div className= {
+                                !errors.email ? 
+                                    'main-form__input'
+                                    :'main-form__input main-form__input_error'}
+                >
+                     <input
+                    className='main-form__input__text'
+                    type="text" 
+                    name="email" 
+                    placeholder='Введите email'
+                    value={formData.email} 
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    />
+                </div>
+                {registerState.message ?
+                        (<div className='main-form__error-message'>{registerState.message}</div>)
+                        :((isDirty.email && errors.email) && <div className='main-form__error-message'>{errors.email}</div>)}
+                <label className='main-form__label'>
+                    Пароль
+                </label>
+                <div 
                     tabIndex="0" 
                     className={
-                        !errors.repeat ?
+                        !errors.password ?
                         'main-form__password-fuild'
                         : 'main-form__password-fuild main-form__input_error'
                     }
@@ -278,27 +248,63 @@ function FormReg() {
                 <input 
                     className='main-form__password-fuild__input'
                     type={
-                        isHiddenRepeat?
+                        isHiddenPassword?
                         'password'
                         :'text'
                     }
-                    name="repeat" 
-                    placeholder='Повторите пароль'
-                    value={formData.repeat} 
+                    name="password" 
+                    placeholder='Введите пароль'
+                    value={formData.password} 
                     onBlur={handleBlur}
                     onChange={handleChange} 
                 />
-                <img 
-                    className='eye'
-                    src={
-                        isHiddenRepeat?
-                        eyeOff
-                        : eyeOpen         
-                    } 
-                    onClick={handleHideRepeat}
-                    alt="Hide the password"/>
+                    <img 
+                        className='eye'
+                        src={
+                            isHiddenPassword?
+                            eyeOff
+                            : eyeOpen         
+                        } 
+                        onClick={handleHidePassword}
+                        alt="Hide the password"/>
+                </div>
+                {(isDirty.password && errors.password) && <div className='main-form__error-message'>{errors.password}</div>}
+                <label className='main-form__label'>
+                    Повторите пароль
+                </label>
+                <div 
+                        tabIndex="0" 
+                        className={
+                            !errors.repeat ?
+                            'main-form__password-fuild'
+                            : 'main-form__password-fuild main-form__input_error'
+                        }
+                    >
+                    <input 
+                        className='main-form__password-fuild__input'
+                        type={
+                            isHiddenRepeat?
+                            'password'
+                            :'text'
+                        }
+                        name="repeat" 
+                        placeholder='Повторите пароль'
+                        value={formData.repeat} 
+                        onBlur={handleBlur}
+                        onChange={handleChange} 
+                    />
+                    <img 
+                        className='eye'
+                        src={
+                            isHiddenRepeat?
+                            eyeOff
+                            : eyeOpen         
+                        } 
+                        onClick={handleHideRepeat}
+                        alt="Hide the password"/>
+                </div>
+                {(isDirty.repeat && errors.repeat) && <div className='main-form__error-message'>{errors.repeat}</div>}
             </div>
-            {(isDirty.repeat && errors.repeat) && <div className='main-form__error-message'>{errors.repeat}</div>}
             <div className='main-form__bottom_center'>
                 <input 
                     className={ 

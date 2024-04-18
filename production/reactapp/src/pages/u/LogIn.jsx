@@ -11,9 +11,7 @@ const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~
 
 function LogIn() {
     return (
-            <div className=''>
-                <FormLogin/>
-            </div>
+        <FormLogin/>
     )
 
 }
@@ -185,60 +183,66 @@ function FormLogin() {
                         Зарегистрируйтесь
                     </Link>
                 </div>
+                <div className='main-form__fuilds-wrapper'>
                 <label className='main-form__label'>
-                    Email
-                </label>
-                <input 
-                    className= {
-                        !errors.email ? 
-                            'main-form__input'
-                            :'main-form__input main-form__input_error'}
-                    type="text" 
-                    name="email" 
-                    placeholder='Введите email'
-                    value={formData.email} 
-                    onBlur={handleBlur}
-                    onChange={handleChange} 
-                />
-                {loginState.message ?
-                    (<div className='main-form__error-message'>{loginState.message}</div>)
-                    :((isDirty.email && errors.email) && <div className='main-form__error-message'>{errors.email}</div>)}
-                <label className='main-form__label'>
-                    Пароль
-                </label>
-                <div 
-                    tabIndex="0" 
-                    className={
-                        !errors.password ?
-                        'main-form__password-fuild'
-                        : 'main-form__password-fuild main-form__input_error'
-                    }
-                >
-                <input 
-                    className='main-form__password-fuild__input'
-                    type={
-                        isHidden?
-                        'password'
-                        :'text'
-                    }
-                    name="password" 
-                    placeholder='Введите пароль'
-                    value={formData.password} 
-                    onBlur={handleBlur}
-                    onChange={handleChange} 
-                />
-                    <img 
-                        className='eye'
-                        src={
+                        Email
+                    </label>
+                    <div className= {
+                                !errors.email ? 
+                                    'main-form__input'
+                                    :'main-form__input main-form__input_error'}
+                    >
+                        <input 
+                            className='main-form__input__text'
+                            type="text" 
+                            name="email" 
+                            placeholder='Введите email'
+                            value={formData.email} 
+                            onBlur={handleBlur}
+                            onChange={handleChange} 
+                        />
+                    </div>
+                    
+                    {loginState.message ?
+                        (<div className='main-form__error-message'>{loginState.message}</div>)
+                        :((isDirty.email && errors.email) && <div className='main-form__error-message'>{errors.email}</div>)}
+                    <label className='main-form__label'>
+                        Пароль
+                    </label>
+                    <div 
+                        tabIndex="0" 
+                        className={
+                            !errors.password ?
+                            'main-form__password-fuild'
+                            : 'main-form__password-fuild main-form__input_error'
+                        }
+                    >
+                    <input 
+                        className='main-form__password-fuild__input'
+                        type={
                             isHidden?
-                            eyeOff
-                            : eyeOpen         
-                        } 
-                        onClick={handleHidePassword}
-                        alt="Hide the password"/>
+                            'password'
+                            :'text'
+                        }
+                        name="password" 
+                        placeholder='Введите пароль'
+                        value={formData.password} 
+                        onBlur={handleBlur}
+                        onChange={handleChange} 
+                    />
+                        <img 
+                            className='eye'
+                            src={
+                                isHidden?
+                                eyeOff
+                                : eyeOpen         
+                            } 
+                            onClick={handleHidePassword}
+                            alt="Hide the password"/>
+                    </div>
+                    {(isDirty.password && errors.password) && <div className='main-form__error-message'>{errors.password}</div>}
                 </div>
-                {(isDirty.password && errors.password) && <div className='main-form__error-message'>{errors.password}</div>}
-                <div className='main-form__bottom_space-between'>
+                    <div className='main-form__bottom_space-between'>
                     <Link to='/u/pass' className='main-form__pass-link' replace>
                             Забыли пароль?
                     </Link>
