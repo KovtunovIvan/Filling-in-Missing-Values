@@ -12,6 +12,7 @@ import './theme/styles/app-sidebar.css';
 import './theme/styles/root.css';
 import './theme/styles/settings.css';
 import './theme/styles/profile.css';
+import './theme/styles/footer.css';
 
 import { userCheck } from "./api/userApi"
 import { setUser } from "./redux/userData";
