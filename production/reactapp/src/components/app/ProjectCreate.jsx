@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { createNewProject } from "../../api/userApi"
+import { createNewProject } from "../../api/projectApi"
 import { useNavigate } from 'react-router-dom';
+
 
 const infoContent = "Описание допустимых форматов данных." 
 const acceptFiles = ".csv, .xlsx"
@@ -10,6 +11,8 @@ function ProjectCreate() {
         loading: false,
         message: "",
     };
+
+
 
     const [isFileSelected, setIsFileSelected] = useState(false);
     const [isActive, setIsActive] = useState(false);

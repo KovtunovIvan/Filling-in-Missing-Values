@@ -1,8 +1,7 @@
 import { useLoaderData, useNavigation } from "react-router-dom";
 import { ProjectList } from "../../components/app/ProjectList"
-import { getAllProjects } from "../../api/userApi"
+import { getAllProjects } from "../../api/projectApi"
 import { LoadingPage } from "./LoadingPage";
-
 
 export const projectsLoader = async ({request, params}) => {
     const data = await getAllProjects();

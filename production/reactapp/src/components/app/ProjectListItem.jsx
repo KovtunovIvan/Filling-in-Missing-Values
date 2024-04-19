@@ -40,6 +40,7 @@ function ProjectListItem(props) {
             to={`/app/projects/${id}`}
             className="project-list__item" 
             key={id} 
+            reloadDocument
         >
             <div className="project-list__item__title">
                 {title}

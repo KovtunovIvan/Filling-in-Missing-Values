@@ -1,33 +1,39 @@
 import { useLoaderData } from "react-router-dom";
 
-import { getProjectByID, getFileByUrl } from "../../api/userApi" 
+import { getProjectByID } from "../../api/projectApi" 
 import { ProjectConfig } from "../../components/app/ProjectConfiguration";
 import { ProcessingSettings } from "../../components/app/ProcessingSettings";
-import { Visualization } from "../../components/app/Visualization";
+import { Visualization, getPicture } from "../../components/app/Visualization";
 import { useEffect, useState } from "react";
+import { setProject, resetProject } from "../../redux/projectData";
+import { useDispatch, useSelector } from "react-redux";
 
 export const OneProjectLoader = async ({request, params}) => {
-    const id = 7;
-    const response = await getProjectByID(id);
-    //const file = await getFileByUrl(response.processed_csv_file_url)
-    //console.log(file)
-    return response;
+    if(params){
+        const response = await getProjectByID(params.id);
+        return response;   
+    } else {
+        return null;
+    }
 }
 
 function Project() {
-    const data = useLoaderData();
-    const projectID = data.id;
-    const source = {
-        name:  data.title,
-        url: data.original_csv_file_url,
-    }
-    const result = 
-        data.processed_csv_file_url ? {
-            name:  data.processed_csv_file_name,
-            url: data.processed_csv_file_url,
-        } : null;
+    const response = useLoaderData();
 
-    const initialIndexState = result ? 1 : 0;
+    //testing
+    console.log(response)
+
+    const dispatch = useDispatch();
+    if(response){
+        dispatch(setProject(response));
+    } else {
+        dispatch(resetProject);
+    }
+
+    const isProcessed = useSelector((state) => state.projectData.processed_csv_file_name) ? true : false;
+    console.log(isProcessed)
+    
+    const initialIndexState = isProcessed ? 1 : 0;
     const [activeIndex, setActiveIndex] = useState(initialIndexState);
     const [isProcessingDisable, setIsProcessingDisable] = useState(true);
 
@@ -53,15 +59,12 @@ function Project() {
         <div className="project-config-container">
             <div className="project-config-wrapper">
                 <ProjectConfig 
-                    source={source} 
-                    result={result} 
+                    isProcessed={isProcessed}
                     getter={getActiveIndex}
                     setter={handleSwitchActive}
                 />
-                <ProcessingSettings 
-                    disabled={isProcessingDisable} id={projectID}/>
-                <Visualization 
-                    disabled={false}/>
+                <ProcessingSettings disabled={isProcessingDisable}/>
+                <Visualization/>
             </div>
         </div>
     )

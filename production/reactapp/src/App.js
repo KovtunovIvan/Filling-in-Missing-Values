@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector} from "react-redux";
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -18,11 +18,11 @@ import { userCheck } from "./api/userApi"
 import { setUser } from "./redux/userData";
 import { LocalStorageTools } from "./localStorage";
 
-import { PrivateRoute } from "./routes/PrivateRoute";
+import { PrivateRoute,userLoader } from "./routes/PrivateRoute";
 import { GuestRoute } from "./routes/GuestRoute";
 
 import { MainLayout } from './components/main/MainLayout';
-import { AppLayout } from './components/app/AppLayout';
+import { AppLayout} from './components/app/AppLayout';
 
 import { Root } from './pages/root/Root';
 import { Contacts } from './pages/platform/Contacts';
@@ -36,7 +36,7 @@ import { CreateProject } from './pages/app/CreateNewProject';
 import { AllProjects, projectsLoader } from "./pages/app/AllProjects";
 import { Settings } from "./pages/app/Settings";
 import { PasswordResore } from "./pages/u/PasswordRestore";
-import { Profile } from "./pages/app/Profile";
+import { Profile, sendProfileFormData } from "./pages/app/Profile";
 import { OneProjectLoader, Project } from "./pages/app/Project";
 
 import ErrorPage from './components/ErrorPage';
@@ -46,27 +46,8 @@ import store from './redux/store';
 
 import {giudeChildrenRoutes} from "./pages/platform/Guide"
 
-function App() {
-  console.log("heloo")
-  console.log(store.getState())
-  const dispatch = useDispatch();
-  useEffect(() => {
-    (async () => {
-      try {
-        const tokens = LocalStorageTools.getItemFromLocalStorage('tokens')
-        const userInfo = tokens ? jwtDecode(tokens.access) : null;
-        console.log(userInfo)
-        if (userInfo) {
-          userCheck(userInfo.user_id).then((response) => {
-            dispatch(setUser(response?.data))
-          })
-        }
-      } catch (err) {
-        console.log(`Error! Unable to check tokens! ${err}`);
-      }
-    })()
-  }, [])
 
+function App() {
   const router = createBrowserRouter([
     {
       path: "/",
@@ -132,6 +113,7 @@ function App() {
           <AppLayout/>
         </PrivateRoute>
       ),
+      loader: userLoader,
       children: [
         {
           index:true,
@@ -152,6 +134,7 @@ function App() {
         {
           path:"profile",
           element:<Profile/>,
+          action: sendProfileFormData,
         },
         {
           path:"settings",

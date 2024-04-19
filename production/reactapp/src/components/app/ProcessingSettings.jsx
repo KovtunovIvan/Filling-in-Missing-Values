@@ -1,6 +1,69 @@
-import { sendDataForProcessing } from "../../api/userApi"
+import { useSelector } from "react-redux";
+import { sendDataForProcessing } from "../../api/projectApi"
 import { SelectOption } from "./SelectOption";
 import {Form, redirect} from "react-router-dom"
+
+const fillMethods = [ 
+    {
+        id: 0,
+        name:"Mean",
+    },
+    {
+        id: 1,
+        name:"Median", 
+    },
+    {
+        id: 2,
+        name:"Min", 
+    },
+    {
+        id: 3,
+        name:"Max", 
+    },
+    {
+        id: 4,
+        name:"Interpol",
+    },
+    {
+        id: 5,
+        name:"LinReg",
+    },
+    {
+        id: 6,
+        name:"KNN",
+    },
+    {
+        id: 7,
+        name:"DecTree",
+    },
+    {
+        id: 8,
+        name:"Forest",
+    },
+    {
+        id: 9,
+        name:"SVM",
+    },
+    {
+        id: 10,
+        name:"XGBoost",
+    },
+    {
+        id: 11,
+        name:"CatBoost",
+    },      
+]
+
+const scalingMathods = [
+    {
+        id: 'standart',
+        name:"Стандартизация",
+    },   
+    {
+        id: 'normalize',
+        name:"Нормализация",
+    },   
+]
 
 export const sendFormData = async ({request}) => {
     let formData = await request.formData();
@@ -10,70 +73,9 @@ export const sendFormData = async ({request}) => {
 } 
 
 function ProcessingSettings(props) {
-    const {disabled, id} = props;
+    const {disabled} = props;
     const buttonStyle = disabled ? "button button_disable" : "button button_default";
-
-    const fillMethods = [ 
-        {
-            id: 0,
-            name:"Mean",
-        },
-        {
-            id: 1,
-            name:"Median", 
-        },
-        {
-            id: 2,
-            name:"Min", 
-        },
-        {
-            id: 3,
-            name:"Max", 
-        },
-        {
-            id: 4,
-            name:"Interpol",
-        },
-        {
-            id: 5,
-            name:"LinReg",
-        },
-        {
-            id: 6,
-            name:"KNN",
-        },
-        {
-            id: 7,
-            name:"DecTree",
-        },
-        {
-            id: 8,
-            name:"Forest",
-        },
-        {
-            id: 9,
-            name:"SVM",
-        },
-        {
-            id: 10,
-            name:"XGBoost",
-        },
-        {
-            id: 11,
-            name:"CatBoost",
-        },      
-    ]
-
-    const scalingMathods = [
-        {
-            id: 'standart',
-            name:"Стандартизация",
-        },   
-        {
-            id: 'normalize',
-            name:"Нормализация",
-        },   
-    ]
+    const id = useSelector((state) => state.projectData.id);
 
     return (
         <div className="project-config-inner-wrapper project-config-inner-wrapper_processing ">

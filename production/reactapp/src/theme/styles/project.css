@@ -7,6 +7,13 @@
   padding: 20px;
 }
 
+.project-create-wrapper{
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
 .project-config-container {
   height: 93%;
   padding: 22px;

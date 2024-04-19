@@ -49,6 +49,7 @@ function Sidebar() {
                 <div className='app-sidebar__navbar'>
                     <NavLink to='/app/projects' 
                         className= {({isActive}) => isActive ? 'app-sidebar__navbar__item_active' : 'app-sidebar__navbar__item'}
+                        reloadDocument
                         >
                             <img 
                                 className='app-sidebar__navbar__item__icon'

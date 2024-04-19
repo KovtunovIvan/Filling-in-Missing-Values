@@ -1,13 +1,19 @@
+import { useSelector } from "react-redux";
+import { getFileByUrl } from "../../api/projectApi"
+
 function ProjectConfig(props) {
-    const {source, result, getter, setter} = props;
-    const fileNameSource = source.name;
-    const fileNameResult = result ? result.name : null;
+    const {isProcessed, getter, setter} = props;
+
+    const fileNameSource = useSelector((state) => state.projectData.original_csv_file_name);
+    const fileNameResult = useSelector((state) => state.projectData.processed_csv_file_name);
+    const fileUrlSource = useSelector((state) => state.projectData.original_csv_file_url);
+    const fileUrlResult = useSelector((state) => state.projectData.processed_csv_file_url);
 
     const switchStyleActive = "project-config__content__data__files__switch__item_active"
     const switchStyle = "project-config__content__data__files__switch__item"
 
     const getSwitchState = () => {
-        if(result) {
+        if(isProcessed) {
             return getter() === 1 ? {
                         source: switchStyle,
                         result: switchStyleActive,
@@ -27,6 +33,10 @@ function ProjectConfig(props) {
     const switchState = getSwitchState();
     const handleChangeActive = (e) => {
         setter(Number(e.target.id))
+    }
+
+    const getActiveFile = () => {
+        getter() === 1 ? getFileByUrl(fileUrlResult) : getFileByUrl(fileUrlSource);
     }
 
     const DefaultSource = (
@@ -98,13 +108,14 @@ function ProjectConfig(props) {
             </div>
             <div className="project-config__content__data__files">
                 <div className="project-config__content__data__files__switch">
-                    {result ? 
+                    {isProcessed ? 
                         Switch 
                         : DefaultSource
                     }
                 </div>
                 <button 
                     className="project-config__content__data__files__button button button_default"
+                    onClick={getActiveFile}
                 >
                     Скачать
                 </button>

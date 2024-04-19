@@ -43,48 +43,58 @@ export const register = async (email, password, dispatch) => {
   return response;
 }
 
-export const getAllProjects = async () => {
-  const auth = authHeader();
-  const response = await instance.get("AllProjects/",{
-      headers: auth,
-    });
-  return response.data;
-}
 
-export const createNewProject = async (file) => {
+export const uploadAvatar = async (file) => {
   const auth = authHeader();
-  const response = await instance.post("upload-file/", file, {
-      headers: auth,
-    });
-  return response.data;
-}
-
-export const getProjectByID = async (id) => {
-  const auth = authHeader();
-  const path = `get-project/${id}/`;
-  const response = await instance.get(path, {
-      headers: auth,
-    });
-  return response.data;
-}
-
-export const sendDataForProcessing = async (formData) => {
-  const auth = authHeader();
-  const project_id = formData.get("project_id");
-  const method_fill_id = formData.get("method_fill_id");
-  const method_scaling_id = formData.get("method_scaling_id");
-  const path = `process-data/${project_id}/${method_fill_id}/${method_scaling_id}/`;
-  const response = await instance.get(path, {
-      headers: auth,
-    });
+  const response = await instance.post("upload-avatar/", {
+    headers: auth,
+    upload_file: file,
+  });
+  LocalStorageTools.setItemToLocalStorage("tokens", response.data.tokens);
   return response;
 }
 
-export const getFileByUrl = async (url) => {
+export const deleteAvatar = async (dispatch) => {
   const auth = authHeader();
-  const path = `${url}/`;
+  const response = await instance.post("delete-avatar/", {
+    headers: auth,
+  });
+  LocalStorageTools.setItemToLocalStorage("tokens", response.data.tokens);
+  dispatch(setUser(response.data));
+  return response;
+}
+
+export const updateProfile = async (formData) => {
+  const auth = authHeader();
+  const middle_name = formData.get("middle_name");
+  const first_name = formData.get("first_name");
+  const last_name = formData.get("last_name");
+  const phone_number = formData.get("phone_number");
+  const path = `update-profile/${first_name}/${last_name}/${middle_name}/${phone_number}/`;
   const response = await instance.get(path, {
       headers: auth,
     });
-  return response.data;
+
+  return response;
+}
+
+export const changePassword = async (formData) => {
+  const auth = authHeader();
+  const old_password = formData.old_password;
+  const new_password = formData.new_password;
+  const path = `change-password/${old_password}/${new_password}/`;
+  const response = await instance.get(path, {
+    headers: auth,
+  });
+  return response;
+}
+
+export const deleteProfile = async (formData) => {
+  const auth = authHeader();
+  const password = formData.password;
+  const path = `delete-profile/${password}/`;
+  const response = await instance.get(path, {
+    headers: auth,
+  });
+  return response;
 }
