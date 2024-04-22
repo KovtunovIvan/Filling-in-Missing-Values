@@ -107,7 +107,7 @@ function StartUsing() {
                 <Link to="/u/reg"
                     className='root__start-using__bottom__button root__start-using__bottom__button_reg'
                 >
-                    Регистрация
+                    Зарегистрироваться
                 </Link>
 
             </div>
