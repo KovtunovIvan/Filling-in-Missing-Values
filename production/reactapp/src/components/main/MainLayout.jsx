@@ -15,7 +15,9 @@ function MainLayout() {
         <>
             <div className="content">
                 <Header/>
-                <Outlet/>
+                <div className="content_outlet">
+                    <Outlet/>
+                </div>
             </div>
             <Footer className="footer-container"/>
             <ScrollRestoration/>     

@@ -100,13 +100,12 @@ function ProjectConfig(props) {
             </button>
         </>
     )
-
+ 
     return (
         <div className="project-config-inner-wrapper project-config-inner-wrapper_data">
             <div className="project-config__title">
                 Данные
             </div>
-            <div className="project-config__content__data__files">
                 <div className="project-config__content__data__files__switch">
                     {isProcessed ? 
                         Switch 
@@ -119,7 +118,6 @@ function ProjectConfig(props) {
                 >
                     Скачать
                 </button>
-            </div>
         </div>
     )
 }

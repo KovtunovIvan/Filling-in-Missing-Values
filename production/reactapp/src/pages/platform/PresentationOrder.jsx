@@ -1,15 +1,23 @@
 
-import { Link, useNavigate} from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
+import { Form, redirect} from 'react-router-dom';
 import { useEffect, useState } from "react";
+
 
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 const PHONE_NUMBER_REGEXP = /^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/
+
 const infoText = "Наши специалисты расскажут о возможностях аналитической платформы MedMinds применительно для вашего бизнеса."
+
+export const sendPresFormData = async ({params, request}) => {
+    let formData = await request.formData();
+    console.log(formData);
+    return redirect("/platform/presentation-success")
+}
+
 
 function PresentationOrder() {
     return (
-            <div className=''>
+            <div className='form-container'>
                 <FormPresentation/>
             </div>
     )
@@ -240,7 +248,9 @@ function FormPresentation() {
 
 
     return (
-        <form className='main-form wrapper_form'>
+        <Form
+            method='POST'
+            className='main-form'>
             <div className='main-form__headline'>
                 Заказать презентацию
             </div>
@@ -256,7 +266,7 @@ function FormPresentation() {
                     Фамилия<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.secondName ? 
+                            !errors.secondName || !isDirty.secondName ? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -276,7 +286,7 @@ function FormPresentation() {
                     Имя<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.firstName ? 
+                            !errors.firstName || !isDirty.firstName? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -314,7 +324,7 @@ function FormPresentation() {
                     Телефон<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.phone ? 
+                            !errors.phone || !isDirty.phone? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -335,7 +345,7 @@ function FormPresentation() {
                     Email<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.email ? 
+                            !errors.email || !isDirty.email? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -356,7 +366,7 @@ function FormPresentation() {
                     Компания<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.company ? 
+                            !errors.company || !isDirty.company? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -414,22 +424,24 @@ function FormPresentation() {
                 </div>
             </div>
             <div className='main-form__bottom_center'>
-                <input 
-                    className={ 
-                        isFormValid ? 
-                            'button button_default'
-                            : 'button button_disable'
-                    }
-                    type="button" 
-                    value="Отправить" 
-                    onClick={
-                        isFormValid ? 
-                            handleSubmit
-                            : null
-                    }
-                />
+                {
+                    isFormValid ?
+                        <button 
+                            className='button button_default'
+                            type="submit" 
+                            value="Отправить" 
+                        >
+                            Отправить
+                        </button>
+                        : <button 
+                            className='button button_disable'
+                            disabled
+                        >
+                            Отправить
+                        </button>
+                }
             </div>
-        </form>
+        </Form>
 )
 }
 

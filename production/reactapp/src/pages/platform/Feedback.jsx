@@ -1,15 +1,24 @@
 
-import { Link, useNavigate} from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
+import { Form, redirect, useActionData } from 'react-router-dom';
 import { useEffect, useState } from "react";
+
 
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 const PHONE_NUMBER_REGEXP = /^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/
+
 const infoText = "Если у вас есть предложения, замечания или вопросы, заполните форму ниже или напишите нам на адрес test@mail.ru или позвоните по номеру +7 (000) 000-00-00."
 
+export const sendFeedbackFormData = async ({params, request}) => {
+    let formData = await request.formData();
+    console.log(formData);
+    return redirect("/platform/feedback-success")
+}
+
 function Feedback() {
+    const response = useActionData();
+    console.log(response);
     return (
-            <div className=''>
+            <div className='form-container'>
                 <FormFeedback/>
             </div>
     )
@@ -64,6 +73,7 @@ function FormFeedback() {
     const [errors, setErrors] = useState(initialErrorsState);
 
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isSended, setIsSended] = useState(false);
 
     useEffect(() => {
         if(
@@ -215,7 +225,10 @@ function FormFeedback() {
 
 
     return (
-        <form className='main-form wrapper_form'>
+        <Form
+            method='POST' 
+            className='main-form'
+        >
             <div className='main-form__headline'>
                 Обратная связь
             </div>
@@ -231,7 +244,7 @@ function FormFeedback() {
                     Фамилия<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.secondName ? 
+                            !errors.secondName || !isDirty.secondName? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -240,7 +253,7 @@ function FormFeedback() {
                         type="text" 
                         name="secondName" 
                         placeholder='Введите фамилию'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.secondName} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -251,7 +264,7 @@ function FormFeedback() {
                     Имя<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.firstName ? 
+                            !errors.firstName || !isDirty.firstName? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -260,7 +273,7 @@ function FormFeedback() {
                         type="text" 
                         name="firstName" 
                         placeholder='Введите имя'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.firstName} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -278,7 +291,7 @@ function FormFeedback() {
                         type="text" 
                         name="surname" 
                         placeholder='Введите отчество'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.surname} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -289,7 +302,7 @@ function FormFeedback() {
                     Телефон<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.phone ? 
+                            !errors.phone || !isDirty.phone? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -298,7 +311,7 @@ function FormFeedback() {
                         type="text" 
                         name="phone" 
                         placeholder='Введите номер телефона'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.phone} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -310,7 +323,7 @@ function FormFeedback() {
                     Email<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.email ? 
+                            !errors.email || !isDirty.email? 
                                 'main-form__input'
                                 :'main-form__input main-form__input_error'}
                 >
@@ -319,7 +332,7 @@ function FormFeedback() {
                         type="text" 
                         name="email" 
                         placeholder='Введите email'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.email} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -338,7 +351,7 @@ function FormFeedback() {
                         type="text" 
                         name="company" 
                         placeholder='Введите название Вашей компании'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.company} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -356,7 +369,7 @@ function FormFeedback() {
                         type="text" 
                         name="post" 
                         placeholder='Введите email'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.post} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -367,7 +380,7 @@ function FormFeedback() {
                     Сообщение<span style={{color:'red'}}> *</span>
                 </label>
                 <div className= {
-                            !errors.feedback ? 
+                            !errors.feedback || !isDirty.feedback? 
                                 'main-form__input main-form__input_message'
                                 :'main-form__input main-form__input_message main-form__input_error'}
                 >
@@ -375,9 +388,9 @@ function FormFeedback() {
                         className='main-form__input__text main-form__input__text_message'
                         type="text" 
                         name="feedback" 
-                        contenteditable="true"
+                        contentEditable="true"
                         placeholder='Напишите отзыв или вопрос'
-                        maxlength={200}
+                        maxLength={200}
                         value={formData.feedback} 
                         onBlur={handleBlur}
                         onChange={handleChange} 
@@ -386,22 +399,24 @@ function FormFeedback() {
                 { (isDirty.feedback && errors.feedback) && <div className='main-form__error-message'>{ errors.feedback }</div> }
             </div>
             <div className='main-form__bottom_center'>
-                <input 
-                    className={ 
-                        isFormValid ? 
-                            'button button_default'
-                            : 'button button_disable'
-                    }
-                    type="button" 
-                    value="Отправить" 
-                    onClick={
-                        isFormValid ? 
-                            handleSubmit
-                            : null
-                    }
-                />
+                {
+                    isFormValid ?
+                        <button 
+                            className='button button_default'
+                            type="submit" 
+                            value="Отправить" 
+                        >
+                            Отправить
+                        </button>
+                        : <button 
+                            className='button button_disable'
+                            disabled
+                        >
+                            Отправить
+                        </button>
+                }
             </div>
-        </form>
+        </Form>
 )
 }
 

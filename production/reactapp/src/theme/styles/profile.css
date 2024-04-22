@@ -145,7 +145,6 @@
 /*---------------AVATAR-SETTINGS---------------*/
 
 .profile___avatar-settings__avatar{
-  padding-bottom: 20px;
   margin-top: 30px;
   display: flex;
   align-items: center;
@@ -154,15 +153,15 @@
 .profile___inner-wrapper__flex{
   flex-direction: column;
   height: 100%;
-  padding: 20px;
+  padding: 10px;
 }
 
 .profile___avatar-settings__avatar__img{
   margin: 0 auto;
   background: white;
   padding: 3px;
-  width: 100px;
-  height: 100px;
+  width: 130px;
+  height: 130px;
   border: 1px solid transparent;
   border-radius: 50%;
   background-image: linear-gradient(white, white), var(--main-lg);
@@ -173,7 +172,7 @@
 .profile___avatar-settings__button-wrapper{
   position: relative;
   display: flex;
-  padding-left: 10px;
+  padding-left: 20px;
 }
 
 .profile___avatar-settings__button_upload{

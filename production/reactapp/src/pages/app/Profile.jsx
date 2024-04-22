@@ -1,13 +1,18 @@
-import { Form, json, useLoaderData } from "react-router-dom";
+import { Form, json, redirect, useActionData, useSubmit } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-import avatar_default from "../../theme/img/app/avatar.svg"
+import { useSelector } from "react-redux";
 import eyeOpen from "../../theme/img/forms/eye-open.svg"
 import eyeOff from "../../theme/img/forms/eye-off.svg"
-import uploadIcon from "../../theme/img/profile/button_upload_photo.svg"
-import deleteIcon from "../../theme/img/profile/button_delete_photo.svg"
+import uploadIcon from "../../theme/img/profile/button_upload_avatar.svg"
+import deleteIcon_active from "../../theme/img/profile/button_delete_avatar_active.svg"
+import deleteIcon_disable from "../../theme/img/profile/button_delete_avatar_disable.svg"
+import { changePassword, deleteAvatar, deleteProfile, getAvatarByURL, updateProfile, uploadAvatar } from "../../api/userApi";
+import userPhoto from "../../theme/img/app/avatar.svg"
+import { Modal } from "../../components/app/Modal";
+import { LocalStorageTools } from "../../localStorage";
 
-import { useSelector } from "react-redux";
+const PHONE_NUMBER_REGEXP = /^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/
+
 
 const acceptFiles = ".png, .jpg"
 const personalDataFuilds = [
@@ -19,17 +24,17 @@ const personalDataFuilds = [
     {
         label: "Имя",
         name: "first_name",
-        placeholder: "Введите Имя"
+        placeholder: "Введите имя"
     },
     {
         label: "Отчество",
         name: "last_name",
-        placeholder: "Введите Отчество"
+        placeholder: "Введите отчество"
     },
     {
         label: "Email",
         name: "email",
-        placeholder: "Введите Email"
+        placeholder: "Введите email"
     },
     {
         label: "Телефон",
@@ -39,79 +44,175 @@ const personalDataFuilds = [
 ]
 
 
-export const sendProfileFormData = async ({request}) => {
-    let formData = await request.formData();
-    let intent = formData.get("intent");
+export function Profile() {
+    const SuccessUpdateProfileModal = {
+        title: "Успешно!",
+        msg: "Изменения в данных профиля сохранены.",
+    };
 
-    if (intent === "add_avatar") {
-        await (formData);
-        return { ok: true };
-    }
-
-    if (intent === "delete_avatar") {
-    await (formData);
-    return { ok: true };
-    }
-
-    if (intent === "edit_profile_data") {
-        await (formData);
-        return { ok: true };
-    }
+    const ServerErrorModal = {
+        title: "Неизвестная ошибка!",
+        msg: "Пожалуйста, перезагрузите страницу или спустя 1-2 минуты попробуйте снова.",
+    };
     
-    if (intent === "edit_password") {
-        await (formData);
-        return { ok: true };
-    }
+    const InvalidPasswordModal = {
+        title: " Ошибка!",
+        msg: (<>Пароль неверный.<br/>Введите корректный пароль.</>),
+    };
 
-    if (intent === "delete_profile") {
-        await (formData);
-        return { ok: true };
-    }
+    const IncorrectPassLengthModal = {
+        title: "Ошибка!",
+        msg: "Пароль должен содержать не менее 8 символов.",
+    };
+
+    const IncorrectPhoneFormatModal = {
+        title: "Ошибка!",
+        msg: (<>Неккоректный формат номера телефона.<br/>Пример: +7(000)000-00-00</>),
+    };
+
+    const PassMatchErrorModal = {
+        title: "Ошибка!",
+        msg: "Введённые пароли не совпадают.",
+    };
+
+    const [modalActive, setModalActive] = useState(false);
+    const [modalContent, setModelContent] = useState(ServerErrorModal);
     
-    throw json(
-        { message: "Invalid intent" },
-        { status: 400 }
-    );
-} 
-
-function Profile() {
-    const avatar = avatar_default; //= data.avatar;
+    const actionData = useActionData();
+    useEffect(()=> {
+        if(actionData){
+            const { intent, msg } = actionData;
+            switch(intent) {
+                //Изменить личные данные
+                case "update_profile": 
+                    if(msg === "Incorrect phone number"){
+                        setModelContent(IncorrectPhoneFormatModal);
+                        setModalActive(true)
+                    }
+                    if(msg === "OK"){
+                        setModelContent(SuccessUpdateProfileModal);
+                        setModalActive(true)
+                    }
+                    break;
+                //Изменить пароль
+                case "change_password":
+                    if(msg === "OK"){
+                        setModelContent(SuccessUpdateProfileModal);
+                        setModalActive(true)
+                    }
+                    if(msg === "Invalid old password"){
+                        setModelContent(InvalidPasswordModal);
+                        setModalActive(true)
+                    }
+                    if(msg === "Incorrect password length"){
+                        setModelContent(IncorrectPassLengthModal);
+                        setModalActive(true)
+                    }
+                    if(msg === "Passwords don't match"){
+                        setModelContent(PassMatchErrorModal);
+                        setModalActive(true)
+                    }
+                    break;
+                //Удалить профиль
+                case "delete_profile":
+                    if(msg === "incorrect password length"){
+                        setModelContent(IncorrectPassLengthModal);
+                        setModalActive(true)
+                    }
+                    if(msg === "Invalid password"){
+                        setModelContent(InvalidPasswordModal);
+                        setModalActive(true)
+                    }
+                    if(msg === "Passwords don't match"){
+                        setModelContent(PassMatchErrorModal);
+                        setModalActive(true)
+                    }
+                    break;
+                //Загрузить аватар
+                case "add_avatar":
+                    if(msg !== "OK"){
+                        setModelContent(ServerErrorModal);;
+                        setModalActive(true);
+                    }
+                    break;
+                //Удалить аватар
+                case "delete_avatar":
+                    if(msg !== "OK"){
+                        setModelContent(ServerErrorModal);;
+                        setModalActive(true);
+                    }
+                    break;
+                default:
+                    setModelContent(ServerErrorModal);;
+                    setModalActive(true);
+            }
+        }
+    }, [actionData])
 
     return (
-        <div className="profile-wrapper">
-            <div className="profile-wrapper__grid-pos-1">
-                <AvatarSettings avatar={avatar}/>
+        <>
+            <div className="profile-wrapper">
+                <div className="profile-wrapper__grid-pos-1">
+                    <AvatarSettings/>
+                </div>
+                <div className="profile-wrapper__grid-pos-2">
+                    <PersonalDataSettings />
+                </div>
+                <div className="profile-wrapper__grid-pos-3">
+                    <PasswordChange />
+                </div>
+                <div className="profile-wrapper__grid-pos-4">
+                    <DeleteProfile />
+                </div>
             </div>
-            <div className="profile-wrapper__grid-pos-2">
-                <PersonalDataSettings />
-            </div>
-            <div className="profile-wrapper__grid-pos-3">
-                <PasswordChange />
-            </div>
-            <div className="profile-wrapper__grid-pos-4">
-                <DeleteProfile />
-            </div>
-        </div>
+            <Modal 
+                active={modalActive}
+                setActive={setModalActive}
+            > 
+                <div className="modal__content__title">
+                    {modalContent.title}
+                </div>
+                <div className="modal__content__msg">
+                    {modalContent.msg}
+                </div>
+                <div className="modal__content__bottom">
+                    <button
+                        className="button button_default modal__content__button_ok"
+                        onClick={() => setModalActive(false)}>
+                        OK
+                    </button>
+                </div>
+            </Modal>
+        </>
     )
 }
 
-function AvatarSettings(props) {
-    const {avatar} = props;
+function AvatarSettings() {
+    const uploudedAvatarUrl = useSelector((state) => state.userData.avatar);
+    let src = uploudedAvatarUrl ? getAvatarByURL(uploudedAvatarUrl): userPhoto;
+    const deleteAvatarButtonStyle = uploudedAvatarUrl ? deleteIcon_active : deleteIcon_disable;
+    const submit = useSubmit();
 
-    function handleUpload() {
 
-        // validste and send to server
-        console.log("Uploaded!");
-        // show dialog window 
+    useEffect(()=>{
+        src = uploudedAvatarUrl ? getAvatarByURL(uploudedAvatarUrl): userPhoto;
+    }, [src, uploudedAvatarUrl])
+
+    function handleUpload(e) {
+        submit(e.currentTarget,{
+            method: "post",
+            action: "/app/profile",
+          });
     }
 
-    function handleDelete() {
-
-        // validste and send to server
-        console.log("Deleted!");
-        // show dialog window 
+    function handleDelete(e) {
+        if(uploudedAvatarUrl) {
+            submit(e.currentTarget,{
+                method: "delete",
+                action: "/app/profile",
+              });
+        }
     }
-
 
 return (
     <div className="profile___inner-wrapper">
@@ -119,20 +220,24 @@ return (
         <div className="profile___avatar-settings__avatar">
             <img 
                 className="profile___avatar-settings__avatar__img"
-                src={avatar} 
+                src={src} 
                 alt="avatar" 
             />
         </div>
 
-        <div className="profile___avatar-settings__button-wrapper">
+        <Form 
+            id="avatar-upload-form"
+            className="profile___avatar-settings__button-wrapper"
+            onChange={handleUpload}
+        >
             <input 
                 type="file" 
                 name="upload-avatar"
                 accept={acceptFiles}
                 id="upload-avatar"
                 className='profile___avatar-settings__button_upload'
-                onChange={handleUpload}
             />
+            <input name="intent" value="add_avatar" className="profile___avatar-settings__button_upload"/>
             <label for="upload-avatar" className="profile___avatar-settings__button__label-wrapper">
                     <img 
                         className="profile___avatar-settings__button__label__icon"
@@ -143,20 +248,26 @@ return (
                     Загрузить фото
                 </div>
             </label>
-        </div>
-        <div className="profile___avatar-settings__button-wrapper">
-            <label for="upload-avatar" className="profile___avatar-settings__button__label-wrapper">
-                    <img 
-                        className="profile___avatar-settings__button__label__icon"
-                        src={deleteIcon} 
-                        alt="icon"
-                    />
-                <div className="profile___avatar-settings__button__label__text">
-                    Удалить фото
-                </div>
-            </label>
-        </div>
 
+        </Form>
+        <Form 
+            id="avatar-delete-form"
+            method="DELETE"
+            className="profile___avatar-settings__button-wrapper"
+            onClick={handleDelete}
+        >
+            <label for="delete-avatar" className="profile___avatar-settings__button__label-wrapper">
+                <img 
+                    className="profile___avatar-settings__button__label__icon"
+                    src={deleteAvatarButtonStyle} 
+                    alt="icon"
+                />
+            <input name="intent" value="delete_avatar" className="profile___avatar-settings__button_upload"/>
+            <div className="profile___avatar-settings__button__label__text">
+                Удалить фото
+            </div>
+            </label>
+        </Form>
         </div>
     </div>
 )
@@ -164,12 +275,11 @@ return (
 
 
 function PersonalDataSettings(props){
-    const {data} = props;
     
     const initialFormDataState = {
         middle_name: useSelector((state) => state.userData.middle_name),
         first_name: useSelector((state) => state.userData.first_name),
-        last_name: useSelector((state) => state.userData.middle_name),
+        last_name: useSelector((state) => state.userData.last_name),
         email: useSelector((state) => state.userData.email),
         phone_number: useSelector((state) => state.userData.phone_number),
     };
@@ -185,6 +295,25 @@ function PersonalDataSettings(props){
 
     const fuilds = personalDataFuilds.map((item, index) => {
         const value = formData[item.name];
+        if(item.name === "email"){
+            return (
+                <p className="profile_fuild-conteiner" key={index}>
+                <div className='profile__label'>
+                    {item.label}
+                </div>
+                <div className="profile__input">
+                    <input 
+                        className='profile__input__text'
+                        type="text" 
+                        name={item.name} 
+                        placeholder={item.placeholder}
+                        value={value}
+                        disabled
+                    />
+                </div>
+            </p>
+            )
+        }
         return (
             <p className="profile_fuild-conteiner" key={index}>
                 <div className='profile__label'>
@@ -203,13 +332,14 @@ function PersonalDataSettings(props){
             </p>
         )
     })
+
     return (
         <div className="profile___inner-wrapper">
             <div className="profile__headline">
                 Личные данные
             </div>
             <Form 
-                method="POST"
+                method="PUT"
                 className="profile___personal-settings__fuilds-container"
             >
                 {fuilds}
@@ -217,7 +347,7 @@ function PersonalDataSettings(props){
                     className="button button_default button_center"
                     type="submit"
                     name="intent"  
-                    value="edit_profile_data"
+                    value="update_profile"
                 >
                         Сохранить
                 </button>
@@ -228,10 +358,33 @@ function PersonalDataSettings(props){
 
 function PasswordChange(){
 
-    const [isHidden, setIsHidden] = useState(true);
-    
-    const handleHidePassword = () => {
-        setIsHidden(prevErrors=> setIsHidden(!prevErrors))
+    const initialFormDataState = {
+        old_password: "",
+        new_password: "",
+        repeat: "",
+    };
+
+    const [formData, setFormData] = useState(initialFormDataState);
+    const [isActive, setIsActive] = useState(false);
+
+    const [isHiddenOldnPassword, setIsHiddenOldnPassword] = useState(true);
+    const [isHiddenNewPassword, setIsHiddenNewPassword] = useState(true);
+    const [isHiddenRepeat, setIsHiddenRepeat] = useState(true);
+
+    useEffect(()=>{
+        if(formData.old_password !== "" && formData.new_password !== "" && formData.repeat !== ""){
+            setIsActive(true)
+        } else {
+            setIsActive(false);
+        }
+    }, [formData])
+
+    const handleChange = (event) => {
+        const {name, value} = event.target;
+        setFormData(prevFormData => ({
+            ...prevFormData,
+            [name]: value
+        }));
     }
 
     return (
@@ -239,7 +392,9 @@ function PasswordChange(){
             <div className="profile__headline profile__headline_center">
                 Изменить пароль
             </div>
-            <Form className="profile___personal-settings__fuilds-container_password">
+            <Form 
+                method="PUT"
+                className="profile___personal-settings__fuilds-container_password">
                 <p className="profile_fuild-conteiner_passsword">
                     <div className='profile__label profile__label_password'>
                         Старый пароль
@@ -250,50 +405,22 @@ function PasswordChange(){
                     <input 
                         className='main-form__password-fuild__input'
                         type={
-                            isHidden?
+                            isHiddenOldnPassword?
                             'password'
                             :'text'
                         }
-                        name="password" 
+                        name="old_password" 
                         placeholder='Введите старый пароль'
+                        onChange={handleChange}
                     />
                         <img 
                             className='eye'
                             src={
-                                isHidden?
+                                isHiddenOldnPassword?
                                 eyeOff
                                 : eyeOpen         
                             } 
-                            onClick={handleHidePassword}
-                            alt="Hide the password"/>
-                    </div>
-                </p>
-
-                <p className="profile_fuild-conteiner_passsword">
-                    <div className='profile__label profile__label_password'>
-                        Повторите пароль
-                    </div>
-                    <div 
-                        className="profile__input_password"
-                    >
-                    <input 
-                        className='main-form__password-fuild__input'
-                        type={
-                            isHidden?
-                            'password'
-                            :'text'
-                        }
-                        name="password" 
-                        placeholder='Повторите старый пароль'
-                    />
-                        <img 
-                            className='eye'
-                            src={
-                                isHidden?
-                                eyeOff
-                                : eyeOpen         
-                            } 
-                            onClick={handleHidePassword}
+                            onClick={() => setIsHiddenOldnPassword(prevState => !prevState)}
                             alt="Hide the password"/>
                     </div>
                 </p>
@@ -308,78 +435,22 @@ function PasswordChange(){
                     <input 
                         className='main-form__password-fuild__input'
                         type={
-                            isHidden?
+                            isHiddenNewPassword?
                             'password'
                             :'text'
                         }
-                        name="password" 
+                        name="new_password" 
                         placeholder='Введите новый пароль'
+                        onChange={handleChange}
                     />
                         <img 
                             className='eye'
                             src={
-                                isHidden?
+                                isHiddenNewPassword?
                                 eyeOff
                                 : eyeOpen         
                             } 
-                            onClick={handleHidePassword}
-                            alt="Hide the password"/>
-                    </div>
-                </p>
-
-                <button 
-                    className="button button_default button_center"
-                    type="submit"
-                    name="intent"  
-                    value="edit_password"
-                >
-                        Изменить
-                </button>
-            </Form>
-        </div>
-    )
-}
-
-
-function DeleteProfile(){
-
-    const [isHidden, setIsHidden] = useState(true);
-    
-    const handleHidePassword = () => {
-        setIsHidden(prevErrors=> setIsHidden(!prevErrors))
-    }
-
-    return (
-        <div className="profile___inner-wrapper">
-            <div className="profile__headline profile__headline_center">
-                Удалить профиль
-            </div>
-            <Form className="profile___personal-settings__fuilds-container_password">
-                <p className="profile_fuild-conteiner_passsword">
-                    <div className='profile__label profile__label_password'>
-                        Пароль
-                    </div>
-                    <div 
-                        className="profile__input_password"
-                    >
-                    <input 
-                        className='main-form__password-fuild__input'
-                        type={
-                            isHidden?
-                            'password'
-                            :'text'
-                        }
-                        name="password" 
-                        placeholder='Введите пароль'
-                    />
-                        <img 
-                            className='eye'
-                            src={
-                                isHidden?
-                                eyeOff
-                                : eyeOpen         
-                            } 
-                            onClick={handleHidePassword}
+                            onClick={() => setIsHiddenNewPassword(prevState => !prevState)}
                             alt="Hide the password"/>
                     </div>
                 </p>
@@ -394,21 +465,150 @@ function DeleteProfile(){
                     <input 
                         className='main-form__password-fuild__input'
                         type={
-                            isHidden?
+                            isHiddenRepeat?
                             'password'
                             :'text'
                         }
-                        name="password" 
-                        placeholder='Повторите пароль'
+                        name="repeat" 
+                        placeholder='Повторите новый пароль'
+                        onChange={handleChange}
                     />
                         <img 
                             className='eye'
                             src={
-                                isHidden?
+                                isHiddenRepeat?
                                 eyeOff
                                 : eyeOpen         
                             } 
-                            onClick={handleHidePassword}
+                            onClick={() => setIsHiddenRepeat(prevState => !prevState)}
+                            alt="Hide the password"/>
+                    </div>
+                </p>
+
+                {
+                    isActive ?
+                    <button 
+                        className="button button_default button_center"
+                        type="submit"
+                        name="intent"  
+                        value="change_password"
+                    >
+                        Изменить
+                    </button>
+                    : <button 
+                        className="button button_desable button_center"
+                        disabled
+                    >
+                        Изменить
+                    </button>
+                }
+            </Form>
+        </div>
+    )
+}
+
+
+function DeleteProfile(){
+    const initialFormDataState = {
+        password: "",
+        repeat: "",
+    };
+
+    const [formData, setFormData] = useState(initialFormDataState);
+
+    const [isHiddenPassword, setIsHiddenPassword] = useState(true);
+    const [isHiddenRepeat, setIsHiddenRepeat] = useState(true);
+    const [isAgree, setIsAgree] = useState(false);
+    const [isActive, setIsActive] = useState(false);
+
+    const handleAgree = (e) => {
+        if(e.target.checked) {
+            setIsAgree(true);
+        } else {
+            setIsAgree(false);
+        }
+    } 
+
+    useEffect(()=>{
+        if(formData.password !== "" && formData.repeat !== "" && isAgree){
+            setIsActive(true)
+        } else {
+            setIsActive(false);
+        }
+    }, [formData, isAgree])
+
+    const handleChange = (event) => {
+        const {name, value} = event.target;
+        setFormData(prevFormData => ({
+            ...prevFormData,
+            [name]: value
+        }));
+    }
+
+    return (
+        <div className="profile___inner-wrapper">
+            <div className="profile__headline profile__headline_center">
+                Удалить профиль
+            </div>
+            <Form
+                method="DELETE" 
+                className="profile___personal-settings__fuilds-container_password">
+                <p className="profile_fuild-conteiner_passsword">
+                    <div className='profile__label profile__label_password'>
+                        Пароль
+                    </div>
+                    <div 
+                        className="profile__input_password"
+                    >
+                    <input 
+                        className='main-form__password-fuild__input'
+                        type={
+                            isHiddenPassword?
+                            'password'
+                            :'text'
+                        }
+                        name="password" 
+                        placeholder='Введите пароль'
+                        onChange={handleChange}
+                    />
+                        <img 
+                            className='eye'
+                            src={
+                                isHiddenPassword?
+                                eyeOff
+                                : eyeOpen         
+                            } 
+                             onClick={() => setIsHiddenPassword(prevState => !prevState)}
+                            alt="Hide the password"/>
+                    </div>
+                </p>
+
+                <p className="profile_fuild-conteiner_passsword">
+                    <div className='profile__label profile__label_password'>
+                        Повторите пароль
+                    </div>
+                    <div 
+                        className="profile__input_password"
+                    >
+                    <input 
+                        className='main-form__password-fuild__input'
+                        type={
+                            isHiddenRepeat?
+                            'password'
+                            :'text'
+                        }
+                        name="repeat" 
+                        placeholder='Повторите пароль'
+                        onChange={handleChange}
+                    />
+                        <img 
+                            className='eye'
+                            src={
+                                isHiddenRepeat?
+                                eyeOff
+                                : eyeOpen         
+                            } 
+                            onClick={() => setIsHiddenRepeat(prevState => !prevState)}
                             alt="Hide the password"/>
                     </div>
                 </p>
@@ -417,23 +617,275 @@ function DeleteProfile(){
                         type="checkbox" 
                         name="agreement" 
                         value="AGREE"
+                        onChange={handleAgree}
                     /> 
                     <div className="profile__checkbox__text">
                         Я принимаю, что все мои данные и информация о проектах будут безвозвратно удалены
                     </div>
                 </p>
-                <button 
-                    className="button button_default button_center"
-                    type="submit"
-                    name="intent"  
-                    value="delete_profile"
-                >
+
+                {
+                    isActive ?
+                        <button 
+                            className="button button_default button_center"
+                            type="submit"
+                            name="intent"  
+                            value="delete_profile"
+                        >
+                            Удалить
+                        </button>
+                        : <button 
+                        className="button button_desable button_center"
+                        disabled
+                    >
                         Удалить
-                </button>
+                    </button>
+                }
             </Form>
         </div>
     )
 }
 
 
-export { Profile }
+export const sendProfileFormData = async ({params, request}) => {
+    let formData = await request.formData();
+    let intent = formData.get("intent");
+    formData.delete("intent")
+
+    // Загрузить аватар
+    if (intent === "add_avatar") {
+        const selectedFile = document.getElementById("upload-avatar").files[0];
+        let newFormData =  new FormData();
+        newFormData.append("avatar", selectedFile)
+        const response = await uploadAvatar(newFormData).then(
+            (response) => {
+                switch (response.status) {
+                    case 200: 
+                        return {
+                            intent: intent,
+                            msg: "OK"
+                        }
+                    default:
+                        return {
+                            intent: intent,
+                            msg: "Unknown error"
+                        }
+                }
+            }, (error) => {
+                switch (error.response.status) {
+                    case 400: 
+                        return {
+                            intent: intent,
+                            msg: "No avatar file provided"
+                        }
+                    case 401: 
+                    return {
+                        intent: intent,
+                        msg: "Authentication failed"
+                    }
+                    default:
+                        return {
+                            intent: intent,
+                            msg: "Unknown error"
+                        }
+                }
+            }
+        )
+        return(response);
+    }
+    // Удалить аватар
+    if (intent === "delete_avatar") {
+        const response = await deleteAvatar().then(
+            (response) => {
+                switch (response.status) {
+                    case 200: 
+                        return {
+                            intent: intent,
+                            msg: "OK"
+                        }
+                    default:
+                        return {
+                            intent: intent,
+                            msg: "Unknown error"
+                        }
+                }
+            }, (error) => {
+                switch (error.response.status) {
+                    case 400: 
+                        return {
+                            intent: intent,
+                            msg: "No avatar file provided"
+                        }
+                    case 401: 
+                        return {
+                            intent: intent,
+                            msg: "Authentication failed"
+                        }
+                    default:
+                        return {
+                            intent: intent,
+                            msg: "Unknown error"
+                        }
+                }
+            }
+        )
+        return response;
+    }
+    // Изменить личные данные
+    if (intent === "update_profile") {
+        if(PHONE_NUMBER_REGEXP.test(formData.get("phone_number"))){
+            const response = await updateProfile(formData).then(
+                (response) => {
+                    switch (response.status) {
+                        case 200: 
+                            return {
+                                intent: intent,
+                                msg: "OK"
+                            }
+                        default:
+                            return {
+                                intent: intent,
+                                msg: "Unknown error"
+                            }
+                    }
+                }, (error) => {
+                    switch (error.response.status) {
+                        case 401: 
+                            return {
+                                intent: intent,
+                                msg: "Authentication failed"
+                            }
+                        default:
+                            return {
+                                intent: intent,
+                                msg: "Unknown error"
+                            }
+                    }
+                }
+            )
+            return response;
+        }
+        return { 
+            intent: intent,  
+            msg: "Incorrect phone number",
+        };
+    }
+    // Изменить пароль
+    if (intent === "change_password") {
+        const old_password = formData.get("old_password");
+        const new_password = formData.get("new_password");
+        const repeat = formData.get("repeat");
+        if(new_password.length < 8 || old_password.length < 8){
+            return { 
+                intent: intent,  
+                msg: "Incorrect password length",
+            }; 
+        }
+        if(new_password === repeat){
+            const newFormData = new FormData();
+            newFormData.append("old_password", old_password)
+            newFormData.append("new_password", new_password)
+            const response = await changePassword(newFormData).then(
+                (response) => {
+                    switch (response.status) {
+                        case 200: 
+                            return {
+                                intent: intent,
+                                msg: "OK"
+                            }
+                        default:
+                            return {
+                                intent: intent,
+                                msg: "Unknown error"
+                            }
+                    }
+                }, (error) => {
+                    if(error){
+                        switch (error.response.status) {
+                            case 401: 
+                                return {
+                                    intent: intent,
+                                    msg: "Authentication failed"
+                                }
+                            case 400: 
+                                return {
+                                    intent: intent,
+                                    msg: "Invalid old password"
+                                }
+                            default:
+                                return {
+                                    intent: intent,
+                                    msg: "Unknown error"
+                                }
+                        }
+                }
+            })
+            return response;
+        } else {
+            return {
+                intent: intent,
+                msg: "Passwords don't match",
+            }
+        }
+    }
+    // Удалить профиль
+    if (intent === "delete_profile") {
+        const password = formData.get("password");
+        const repeat = formData.get("repeat");
+        const agreement = formData.get("agreement")
+        if(password === repeat){
+            if(agreement === "AGREE"){
+                const newFormData = new FormData();
+                newFormData.append("password", password)
+                const response = await deleteProfile(newFormData).then(
+                    (response) => {
+                        switch (response.status) {
+                            case 200: 
+                                LocalStorageTools.removeFromLocalStorage('tokens');
+                                return redirect('/');
+                            default:
+                                return {
+                                    intent: intent,
+                                    msg: "Unknown error"
+                                }
+                        }
+                    }, (error) => {
+                        switch (error.response.status) {
+                            case 401: 
+                                return {
+                                    intent: intent,
+                                    msg: "Authentication failed"
+                                }
+                            case 400: 
+                                return {
+                                    intent: intent,
+                                    msg: "Invalid password"
+                                }
+                            default:
+                                return {
+                                    intent: intent,
+                                    msg: "Unknown error"
+                                }
+                        }
+                    }
+                )
+                return response;
+            } else {
+                return {
+                    intent: intent,
+                    msg: "Agreement error",
+                }
+            }
+        } else {
+            return {
+                intent: intent,
+                msg: "Passwords don't match",
+            }
+        }
+    }
+    
+    throw json(
+        { msg: "Invalid intent" },
+        { status: 400 }
+    );
+} 

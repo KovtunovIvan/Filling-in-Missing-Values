@@ -8,6 +8,7 @@
   align-items: stretch;
   justify-items: stretch;
   height: 100%;
+  background: var(--main-bg-color);
 }
 
 .workspace {

@@ -11,7 +11,10 @@ const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~
 
 function LogIn() {
     return (
-        <FormLogin/>
+        <div className='form-container'>
+            <FormLogin/>
+        </div>
+
     )
 
 }
@@ -60,7 +63,7 @@ function FormLogin() {
     }, [isCorrectInput])
 
     const handleHidePassword = () => {
-        setIsHidden(prevErrors=> setIsHidden(!prevErrors))
+        setIsHidden(prevState => !prevState)
     }
 
     const handleBlur = (e) => {

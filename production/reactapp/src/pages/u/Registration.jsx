@@ -11,7 +11,7 @@ const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~
 
 function Registration() {
     return (
-        <div className=''>
+        <div className='form-container'>
             <FormReg/>
         </div>
     )
@@ -68,11 +68,11 @@ function FormReg() {
 
 
     const handleHidePassword = () => {
-        setIsHiddenPassword(prevErrors=> setIsHiddenPassword(!prevErrors))
+        setIsHiddenPassword(prevState => !prevState)
     }
 
     const handleHideRepeat = () => {
-        setIsHiddenRepeat(prevErrors=> setIsHiddenRepeat(!prevErrors))
+        setIsHiddenRepeat(prevState => !prevState)
     }
 
     
@@ -193,7 +193,7 @@ function FormReg() {
         )
     }
     return (
-        <form className='main-form wrapper_form'>
+        <form className='main-form'>
             <div id="reg-hdl" className='main-form__headline'>
                 Регистрация
             <img 

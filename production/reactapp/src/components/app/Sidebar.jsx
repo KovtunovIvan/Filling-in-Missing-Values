@@ -1,7 +1,8 @@
 import logo from '../../theme/img/logo/logo.svg';
 import { Link, NavLink, useMatch } from "react-router-dom";
-import { logout } from "../../api/userApi";
+import { getAvatarByURL, logout } from "../../api/userApi";
 import { LocalStorageTools } from "../../localStorage";
+import { useSelector } from 'react-redux';
 
 import userPhoto from "../../theme/img/app/avatar.svg"
 import progectsIconDefault from "../../theme/img/sidebar/projects-icon.svg";
@@ -16,6 +17,9 @@ import profileIconSolid from '../../theme/img/sidebar/profile-icon_solid.svg'
 import cogIconSolid from '../../theme/img/sidebar/settings-icon_solid.svg';
 
 function Sidebar() {
+    const uploudedAvatarUrl = useSelector((state) => state.userData.avatar);
+    const src = uploudedAvatarUrl ? getAvatarByURL(uploudedAvatarUrl): userPhoto;
+
     const hendleLogout = () => {
         const tokens = LocalStorageTools.getItemFromLocalStorage('tokens');
         logout(tokens.refresh);
@@ -34,7 +38,7 @@ function Sidebar() {
                 <div className="app-sidebar__head__user">
                     <img 
                         className='app-sidebar__head__user__photo'
-                        src={userPhoto} 
+                        src={src} 
                         alt="user" 
                     />
                 </div>

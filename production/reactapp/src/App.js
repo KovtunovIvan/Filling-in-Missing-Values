@@ -13,6 +13,8 @@ import './theme/styles/root.css';
 import './theme/styles/settings.css';
 import './theme/styles/profile.css';
 import './theme/styles/footer.css';
+import './theme/styles/success-main-submit.css';
+import './theme/styles/modal.css';
 
 import { userCheck } from "./api/userApi"
 import { setUser } from "./redux/userData";
@@ -27,8 +29,8 @@ import { AppLayout} from './components/app/AppLayout';
 import { Root } from './pages/root/Root';
 import { Contacts } from './pages/platform/Contacts';
 import { Guide } from './pages/platform/Guide';
-import { Feedback } from './pages/platform/Feedback';
-import { PresentationOrder } from './pages/platform/PresentationOrder';
+import { Feedback, sendFeedbackFormData } from './pages/platform/Feedback';
+import { PresentationOrder, sendPresFormData } from './pages/platform/PresentationOrder';
 import { LogIn } from './pages/u/LogIn';
 import { Registration } from './pages/u/Registration';
 import { Demo } from './pages/platform/Demo';
@@ -36,9 +38,9 @@ import { CreateProject } from './pages/app/CreateNewProject';
 import { AllProjects, projectsLoader } from "./pages/app/AllProjects";
 import { Settings } from "./pages/app/Settings";
 import { PasswordResore } from "./pages/u/PasswordRestore";
-import { Profile, sendProfileFormData } from "./pages/app/Profile";
+import { Profile, Profileloader, sendProfileFormData } from "./pages/app/Profile";
 import { OneProjectLoader, Project } from "./pages/app/Project";
-
+import { SuccessfulSubmitPage } from "./pages/platform/SuccessfulSubmitPage"
 import ErrorPage from './components/ErrorPage';
 import { sendFormData } from "./components/app/ProcessingSettings";
 import store from './redux/store';
@@ -71,14 +73,24 @@ function App() {
         {
           path:"feedback",
           element:<Feedback/>,
+          action: sendFeedbackFormData,
         },
         {
           path:"presentation",
           element:<PresentationOrder/>,
+          action: sendPresFormData,
         },
         {
           path:"demo",
           element:<Demo/>,
+        },
+        {
+          path:"feedback-success",
+          element:<SuccessfulSubmitPage page={"feedback"}/>,
+        },
+        {
+          path:"presentation-success",
+          element:<SuccessfulSubmitPage page={"presentation"}/>,
         },
       ]
     },

@@ -64,12 +64,11 @@ const scalingMathods = [
         name:"Нормализация",
     },   
 ]
-
+ 
 export const sendFormData = async ({request}) => {
     let formData = await request.formData();
-    redirect("/app/projects");
     const response = await sendDataForProcessing(formData);
-    return response;
+     return redirect("/app/projects");;
 } 
 
 function ProcessingSettings(props) {
@@ -78,15 +77,15 @@ function ProcessingSettings(props) {
     const id = useSelector((state) => state.projectData.id);
 
     return (
-        <div className="project-config-inner-wrapper project-config-inner-wrapper_processing ">
+        <div className="project-config-inner-wrapper project-config-inner-wrapper_processing">
             <div className="project-config__title">
                 Обработка данных
             </div>
             <Form 
                 action="/app/projects/:id"
                 method="post"
-                className="project-config__content project-config__content_processing">
-                <div className="project-config__content_form">
+                className="project-config__content_processing">
+                <div className="project-processing__content_form">
                     <SelectOption
                         label="Заполнение пропусков"
                         name="method_fill_id"

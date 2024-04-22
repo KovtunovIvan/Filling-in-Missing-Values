@@ -3,7 +3,7 @@ import { createNewProject } from "../../api/projectApi"
 import { useNavigate } from 'react-router-dom';
 
 
-const infoContent = "Описание допустимых форматов данных." 
+const infoContent = "Загрузите файл формата .CSV или .XLSX. размером не более 100Мб с Вашего устройства." 
 const acceptFiles = ".csv, .xlsx"
 
 function ProjectCreate() {
@@ -11,9 +11,6 @@ function ProjectCreate() {
         loading: false,
         message: "",
     };
-
-
-
     const [isFileSelected, setIsFileSelected] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const [createState, setCreateState] = useState(initialCreateState);
@@ -63,13 +60,12 @@ function ProjectCreate() {
     }
 
     return (
-        <div className="project-config-inner-wrapper project-config-inner-wrapper_data">
-            <div className="project-config__title">
-                Данные
+        <div className="project-create-inner-wrapper">
+            <div className="project-create__title">
+                Создать проект
             </div>
-            <div className="project-config__content project-config__content__data">
-                <div className="project-config__content__data__info">
-                    <div>{infoContent}</div>
+                <div className="project-create__content__data__info">
+                    {infoContent}
                 </div>
                 <div className='project-config__content__data__input-wrapper'>
                     <input 
@@ -83,7 +79,6 @@ function ProjectCreate() {
                     <label for="input__file" class="button button_default">
                         <div>Загрузить файл</div>
                     </label>
-                </div>
             </div>
         </div>
     )

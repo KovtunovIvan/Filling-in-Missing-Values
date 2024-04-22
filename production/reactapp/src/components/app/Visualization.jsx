@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import matrixIcon from "../../theme/img/visualization/matrix-icon.svg"
-import nornDistibutionIcon from "../../theme/img/visualization/norm-distribution-icon.svg"
-import boxBlotIcon from "../../theme/img/visualization/box-plot-icon.svg"
 import { getNormalDistribution, getCorrelationMatrix, getBoxPlot} from "../../api/projectApi"
 import { useDispatch, useSelector } from 'react-redux';
 import { setColumn, setImg, setVisualizationType } from '../../redux/visualizationData';
+import matrixIcon from "../../theme/img/visualization/matrix-icon.svg"
+import nornDistibutionIcon from "../../theme/img/visualization/norm-distribution-icon.svg"
+import boxBlotIcon from "../../theme/img/visualization/box-plot-icon.svg"
+
 
 const graficTypes = [ 
     {
@@ -149,7 +150,7 @@ function Visualization(props) {
                             */
                         }
                     <div className='project-config__content_vis-result__img-container'>
-                        <img id="image-g" alt="Выберите график" height={420} src={imgSrc}/>
+                        <img id="image-g" alt="Выберите график" height={400} src={imgSrc}/>
                     </div>
                 </div>
 
