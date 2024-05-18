@@ -181,9 +181,17 @@ STATIC_URL = "static/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField" 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Настройки для обработки загруженных файлов проектов
-ORIGINAL_CSV_FILES_DIR = 'original_csv_files/'  
-PROCESSED_CSV_FILES_DIR = 'processed_csv_files/'  
-AVATARS_DIR = 'avatars/'
+ORIGINAL_CSV_FILES_DIR = "original_csv_files/"
+PROCESSED_CSV_FILES_DIR = "processed_csv_files/"
+AVATARS_DIR = "avatars/"
+
+# Настройки SMTP сервера для отправки электронной почты
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.mail.ru"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "medmindes@mail.ru"
+EMAIL_HOST_PASSWORD = "pX6vczzPuTyKWcRTrR4F"

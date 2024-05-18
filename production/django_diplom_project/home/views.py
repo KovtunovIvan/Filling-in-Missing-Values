@@ -44,10 +44,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from .models import Token
+from .models import User
+from django.views.decorators.csrf import csrf_exempt
+from .serializers import LoginSerializer, RegistrationSerializer, UserSerializer
+from django.http import StreamingHttpResponse
+import time
 
-from .serializers import (
-    LoginSerializer, RegistrationSerializer, UserSerializer
-)
 
 class RegistrationAPIView(GenericAPIView):
     permission_classes = (AllowAny,)
@@ -62,8 +69,8 @@ class RegistrationAPIView(GenericAPIView):
         data["tokens"] = {"refresh": str(token), "access": str(token.access_token)}
         # headers = {"Authorization": f'Bearer {str(token.access_token)}'}
         return Response(data, status=status.HTTP_201_CREATED)
-    
-    
+
+
 class LoginAPIView(GenericAPIView):
     permission_classes = (AllowAny,)
     serializer_class = LoginSerializer
@@ -76,7 +83,7 @@ class LoginAPIView(GenericAPIView):
         token = RefreshToken.for_user(user)
         data = serializer.data
         data["tokens"] = {"refresh": str(token), "access": str(token.access_token)}
-        
+
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -84,25 +91,24 @@ class IdGetUser(GenericAPIView):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
 
-    def post(self,request):
-        reqdata = request.data['data']
-        userID = reqdata['id']
+    def post(self, request):
+        reqdata = request.data["data"]
+        userID = reqdata["id"]
         print(userID)
         if userID:
             user = User.objects.get_user(userID)
             serializer = UserSerializer(user)
             data = serializer.data
             print(data)
-        else: 
-            data = {
-                "user": 'no user found' 
-            }
+        else:
+            data = {"user": "no user found"}
         return Response(data, status=status.HTTP_200_OK)
 
 
 class UserLogoutAPIView(GenericAPIView):
 
     permission_classes = (IsAuthenticated,)
+
     def post(self, request, *args, **kwargs):
         try:
             refresh_token = request.data["refresh"]
@@ -112,6 +118,7 @@ class UserLogoutAPIView(GenericAPIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserAPIView(RetrieveUpdateAPIView):
     """
@@ -123,28 +130,42 @@ class UserAPIView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def list_projects(request):
     user = request.user  # Получаем текущего авторизованного пользователя
     projects = Project.objects.filter(user=user)  # Фильтруем проекты по пользователю
     serializer = ProjectSerializer(projects, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_project(request, project_id):
     try:
         project = Project.objects.get(pk=project_id)
         serializer = ProjectSerializer(project)
         data = serializer.data
         # Добавляем ссылки на загруженный и обработанный файлы
-        data["original_csv_file_url"] = project.original_csv_file.url if project.original_csv_file else None
-        data["processed_csv_file_url"] = project.processed_csv_file.url if project.processed_csv_file else None
+        data["original_csv_file_url"] = (
+            project.original_csv_file.url if project.original_csv_file else None
+        )
+        data["processed_csv_file_url"] = (
+            project.processed_csv_file.url if project.processed_csv_file else None
+        )
         # Получаем только имена файлов без путей к директориям
-        data["original_csv_file_name"] = os.path.basename(project.original_csv_file.name) if project.original_csv_file else None
-        data["processed_csv_file_name"] = os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
+        data["original_csv_file_name"] = (
+            os.path.basename(project.original_csv_file.name)
+            if project.original_csv_file
+            else None
+        )
+        data["processed_csv_file_name"] = (
+            os.path.basename(project.processed_csv_file.name)
+            if project.processed_csv_file
+            else None
+        )
         # Проверяем наличие файла на сервере и путь к файлу в базе данных
         processed_data_path = None
         if project.processed_csv_file and project.processed_csv_file.name:
@@ -157,11 +178,13 @@ def get_project(request, project_id):
             except FileNotFoundError:
                 features = None
         else:
-            features = None 
+            features = None
         data["features"] = features
         return Response(data, status=status.HTTP_200_OK)
     except Project.DoesNotExist:
-        return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
 
 """@api_view(['GET'])
@@ -218,25 +241,31 @@ def download_processed_csv_file(request, project_id):
     except Project.DoesNotExist:
         return HttpResponse("Project not found", status=404)"""
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])  
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def upload_file(request):
-    if request.method == 'POST':
-        if 'file' not in request.FILES:
-            return Response({'success': False, 'message': 'No file uploaded'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        uploaded_file = request.FILES['file']
-        
+    if request.method == "POST":
+        if "file" not in request.FILES:
+            return Response(
+                {"success": False, "message": "No file uploaded"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        uploaded_file = request.FILES["file"]
+
         # Получаем базовое имя файла (без расширения)
         base_name, ext = os.path.splitext(uploaded_file.name)
-        
+
         # Если имя файла уже содержит скобки и номер внутри, увеличиваем номер
         if re.match(r"^(.*)\s\((\d+)\)$", base_name):
             match = re.match(r"^(.*)\s\((\d+)\)$", base_name)
             base_name = match.group(1)
             existing_projects_count = int(match.group(2))
         else:
-            existing_projects_count = Project.objects.filter(title__startswith=base_name).count()
+            existing_projects_count = Project.objects.filter(
+                title__startswith=base_name
+            ).count()
 
         # Создаем уникальное имя проекта с номером
         title = f"{base_name} ({existing_projects_count + 1})"
@@ -244,16 +273,18 @@ def upload_file(request):
         # Создаем проект и сохраняем файл
         project = Project.objects.create(title=title, user=request.user)
         project.original_csv_file = uploaded_file
-        project.original_csv_file.name = f'{title}.csv'
+        project.original_csv_file.name = f"{title}.csv"
         project.save()
         print(title)
 
-        return Response({'success': True, 'message': 'Project created successfully!'}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"success": True, "message": "Project created successfully!"},
+            status=status.HTTP_201_CREATED,
+        )
 
 
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def process_data(request, project_id, method_fill_id, method_scaling_id):
     # Получаем объект проекта по его идентификатору
     project = Project.objects.get(pk=project_id)
@@ -268,19 +299,41 @@ def process_data(request, project_id, method_fill_id, method_scaling_id):
 
     df_encoding = data_encoding(df)
 
-    all_methods_names = ['mean_fill', 'median_fill', 'min_fill', 'max_fill', 'interpolate_fill', 
-              'linreg_imputer', 'KNN_fill', 'DecisionTree_imputer',
-              'RandomForest_imputer', 'SVM_imputer', 'XGBRegressor_imputer', 'CatBoostRegressor_imputer']
-    
-    all_methods = [mean_fill(df_encoding), median_fill(df_encoding), min_fill(df_encoding), max_fill(df_encoding), interpolate_fill(df_encoding), 
-              linreg_imputer(df_encoding), KNN_fill(df_encoding), DecisionTree_imputer(df_encoding),
-              RandomForest_imputer(df_encoding), SVM_imputer(df_encoding), XGBRegressor_imputer(df_encoding), CatBoostRegressor_imputer(df_encoding)]
+    all_methods_names = [
+        "mean_fill",
+        "median_fill",
+        "min_fill",
+        "max_fill",
+        "interpolate_fill",
+        "linreg_imputer",
+        "KNN_fill",
+        "DecisionTree_imputer",
+        "RandomForest_imputer",
+        "SVM_imputer",
+        "XGBRegressor_imputer",
+        "CatBoostRegressor_imputer",
+    ]
+
+    all_methods = [
+        mean_fill(df_encoding),
+        median_fill(df_encoding),
+        min_fill(df_encoding),
+        max_fill(df_encoding),
+        interpolate_fill(df_encoding),
+        linreg_imputer(df_encoding),
+        KNN_fill(df_encoding),
+        DecisionTree_imputer(df_encoding),
+        RandomForest_imputer(df_encoding),
+        SVM_imputer(df_encoding),
+        XGBRegressor_imputer(df_encoding),
+        CatBoostRegressor_imputer(df_encoding),
+    ]
 
     filled_df = all_methods[method_fill_id]
 
-    if method_scaling_id == 'standart':
+    if method_scaling_id == "standart":
         scale_df = scaling_standart(filled_df)
-    elif method_scaling_id == 'normalize':
+    elif method_scaling_id == "normalize":
         scale_df = normalization_scale(filled_df)
 
     # Создаем новый файл CSV с заполненными значениями
@@ -293,40 +346,46 @@ def process_data(request, project_id, method_fill_id, method_scaling_id):
     buffer.write(result_df.encode())
 
     # Сохраняем обработанный файл в объекте проекта
-    project.processed_csv_file.save(f'{title}_{all_methods_names[method_fill_id]}.csv', buffer)
+    project.processed_csv_file.save(
+        f"{title}_{all_methods_names[method_fill_id]}.csv", buffer
+    )
 
     # Возвращаем созданный файл в ответе
-    response = HttpResponse(result_df, content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=f"{title}_{all_methods_names[method_fill_id]}.csv"'
+    response = HttpResponse(result_df, content_type="text/csv")
+    response["Content-Disposition"] = (
+        'attachment; filename=f"{title}_{all_methods_names[method_fill_id]}.csv"'
+    )
     return response
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def correlation_matrix_view(request, project_id):
     try:
         project = Project.objects.get(pk=project_id)
         user_id = request.user.id
-        
+
         visualization = Visualization.objects.filter(
-            project_id=project_id,
-            visualization_type='Correlation Matrix'
+            project_id=project_id, visualization_type="Correlation Matrix"
         ).first()
 
         if visualization:
-            with open(visualization.image_path, 'rb') as f:
+            with open(visualization.image_path, "rb") as f:
                 image_data = f.read()
-            return HttpResponse(image_data, content_type='image/png')
-        
+            return HttpResponse(image_data, content_type="image/png")
+
         file_path = project.processed_csv_file.path
         df = pd.read_csv(file_path)
-        
+
         corr_matrix = df.corr()
 
         plt.figure(figsize=(10, 8))
-        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=.5)
-        plt.title('Correlation Matrix')
-        
-        plot_dir = os.path.join('project_plots', 'correlation_matrices', str(user_id), str(project_id))
+        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
+        plt.title("Correlation Matrix")
+
+        plot_dir = os.path.join(
+            "project_plots", "correlation_matrices", str(user_id), str(project_id)
+        )
         os.makedirs(plot_dir, exist_ok=True)
 
         image_name = f"{os.path.splitext(os.path.basename(file_path))[0]}.png"
@@ -337,50 +396,53 @@ def correlation_matrix_view(request, project_id):
         # Сохраняем информацию о визуализации в базе данных
         Visualization.objects.create(
             project_id=project_id,
-            visualization_type='Correlation Matrix',
-            image_path=image_path
+            visualization_type="Correlation Matrix",
+            image_path=image_path,
         )
 
         plt.clf()
 
-        with open(image_path, 'rb') as f:
+        with open(image_path, "rb") as f:
             image_data = f.read()
-        return HttpResponse(image_data, content_type='image/png')
+        return HttpResponse(image_data, content_type="image/png")
 
     except Project.DoesNotExist:
 
         return HttpResponse("Project not found", status=404)
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def normal_distribution_view(request, project_id, feature_name):
     try:
         project = Project.objects.get(pk=project_id)
         user_id = request.user.id
-        
+
         visualization = Visualization.objects.filter(
             project_id=project_id,
             feature_name=feature_name,
-            visualization_type='Normal Distribution'
+            visualization_type="Normal Distribution",
         ).first()
 
         if visualization:
-            with open(visualization.image_path, 'rb') as f:
+            with open(visualization.image_path, "rb") as f:
                 image_data = f.read()
-            return HttpResponse(image_data, content_type='image/png')
-        
+            return HttpResponse(image_data, content_type="image/png")
+
         file_path = project.processed_csv_file.path
         df = pd.read_csv(file_path)
-        
+
         feature_data = df[feature_name]
-        
+
         plt.figure(figsize=(10, 8))
-        sns.histplot(feature_data, kde=True, color='blue', bins=20)
-        plt.title(f'Normal Distribution of {feature_name}')
+        sns.histplot(feature_data, kde=True, color="blue", bins=20)
+        plt.title(f"Normal Distribution of {feature_name}")
         plt.xlabel(feature_name)
-        plt.ylabel('Frequency')
-        
-        plot_dir = os.path.join('project_plots', 'normal_distributions', str(user_id), str(project_id))
+        plt.ylabel("Frequency")
+
+        plot_dir = os.path.join(
+            "project_plots", "normal_distributions", str(user_id), str(project_id)
+        )
         os.makedirs(plot_dir, exist_ok=True)
 
         image_name = f"{feature_name}_normal_distribution.png"
@@ -392,46 +454,49 @@ def normal_distribution_view(request, project_id, feature_name):
         Visualization.objects.create(
             project_id=project_id,
             feature_name=feature_name,
-            visualization_type='Normal Distribution',
-            image_path=image_path
+            visualization_type="Normal Distribution",
+            image_path=image_path,
         )
 
         plt.clf()
 
-        with open(image_path, 'rb') as f:
+        with open(image_path, "rb") as f:
             image_data = f.read()
-        return HttpResponse(image_data, content_type='image/png')
+        return HttpResponse(image_data, content_type="image/png")
 
     except Project.DoesNotExist:
 
         return HttpResponse("Project not found", status=404)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def box_plot_view(request, project_id, feature_name):
     try:
         project = Project.objects.get(pk=project_id)
         user_id = request.user.id
-        
+
         visualization = Visualization.objects.filter(
             project_id=project_id,
-            visualization_type='Box Plot',
-            feature_name=feature_name
+            visualization_type="Box Plot",
+            feature_name=feature_name,
         ).first()
 
         if visualization:
-            with open(visualization.image_path, 'rb') as f:
+            with open(visualization.image_path, "rb") as f:
                 image_data = f.read()
-            return HttpResponse(image_data, content_type='image/png')
-        
+            return HttpResponse(image_data, content_type="image/png")
+
         file_path = project.processed_csv_file.path
         df = pd.read_csv(file_path)
-        
+
         plt.figure(figsize=(10, 8))
         sns.boxplot(x=feature_name, data=df)
-        plt.title(f'Box Plot for {feature_name}')
-        
-        plot_dir = os.path.join('project_plots', 'box_plots', str(user_id), str(project_id))
+        plt.title(f"Box Plot for {feature_name}")
+
+        plot_dir = os.path.join(
+            "project_plots", "box_plots", str(user_id), str(project_id)
+        )
         os.makedirs(plot_dir, exist_ok=True)
 
         image_name = f"{os.path.splitext(os.path.basename(file_path))[0]}_{feature_name}_box_plot.png"
@@ -441,43 +506,46 @@ def box_plot_view(request, project_id, feature_name):
 
         Visualization.objects.create(
             project_id=project_id,
-            visualization_type='Box Plot',
+            visualization_type="Box Plot",
             feature_name=feature_name,
-            image_path=image_path
+            image_path=image_path,
         )
 
         plt.clf()
 
-        with open(image_path, 'rb') as f:
+        with open(image_path, "rb") as f:
             image_data = f.read()
-        return HttpResponse(image_data, content_type='image/png')
+        return HttpResponse(image_data, content_type="image/png")
 
     except Project.DoesNotExist:
         return HttpResponse("Project not found", status=404)
-    
-@api_view(['POST'])
-@permission_classes([IsAuthenticated]) 
-def upload_avatar(request):
-    if request.method == 'POST' and request.FILES.get('avatar'):
-        user = request.user
-        user.avatar = request.FILES['avatar']
-        user.save()
-        return Response({'message': 'Avatar uploaded successfully'})
-    else:
-        return Response({'error': 'No avatar file provided'}, status=400)
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated]) 
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload_avatar(request):
+    if request.method == "POST" and request.FILES.get("avatar"):
+        user = request.user
+        user.avatar = request.FILES["avatar"]
+        user.save()
+        return Response({"message": "Avatar uploaded successfully"})
+    else:
+        return Response({"error": "No avatar file provided"}, status=400)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def delete_avatar(request):
     user = request.user
     if user.avatar:
         user.avatar.delete()
         user.save()
-        return Response({'message': 'Avatar deleted successfully'})
+        return Response({"message": "Avatar deleted successfully"})
     else:
-        return Response({'error': 'No avatar to delete'}, status=400)
-    
-@api_view(['PUT'])
+        return Response({"error": "No avatar to delete"}, status=400)
+
+
+@api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def change_password(request, old_password, new_password):
     # Аутентифицируем пользователя
@@ -491,8 +559,9 @@ def change_password(request, old_password, new_password):
 
     return Response({"message": "Password has been changed successfully."}, status=200)
 
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated]) 
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
 def update_profile(request, first_name, last_name, middle_name, phone_number):
     user = request.user
     user.first_name = first_name
@@ -503,11 +572,92 @@ def update_profile(request, first_name, last_name, middle_name, phone_number):
     return Response({"message": "Profile updated successfully"}, status=200)
 
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated]) 
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def delete_user_profile(request, password):
     user = request.user
     if not user.check_password(password):
-        return Response({'error': 'Invalid password'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST
+        )
     user.delete()
-    return Response({'message': 'User profile and related data deleted successfully'}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "User profile and related data deleted successfully"},
+        status=status.HTTP_200_OK,
+    )
+
+
+@csrf_exempt
+def reset_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        try:
+            user = User.objects.get(email=email)
+            # Создание временного пароля
+            temp_password = User.objects.make_random_password()
+            user.set_password(temp_password)
+            user.save()
+            # Отправка временного пароля по электронной почте
+            send_mail(
+                "MedMindes. Сброс пароля",
+                f"Мы получили запрос на сброс пароля для вашей учётной записи.\nЕсли вы делали такой запрос, воспользуйтесь паролем ниже. Если нет, то сообщите нам об этом в ответоном письме.\nВаш временный пароль: {temp_password}",
+                "medmindes@mail.ru",
+                [email],
+                fail_silently=False,
+            )
+            return JsonResponse(
+                {"message": "Временный пароль отправлен на вашу электронную почту."}
+            )
+        except User.DoesNotExist:
+            return JsonResponse(
+                {
+                    "error": "Пользователь с таким адресом электронной почты не существует."
+                }
+            )
+
+
+@csrf_exempt
+def contact_view(request):
+    if request.method == "POST":
+        try:
+            email = request.POST.get("email")
+            last_name = request.POST.get("last_name")
+            first_name = request.POST.get("first_name")
+            middle_name = request.POST.get("middle_name")
+            phone = request.POST.get("phone")
+            company = request.POST.get("company")
+            position = request.POST.get("position")
+            message = request.POST.get("message")
+            form_type = request.POST.get("form_type")
+
+            if form_type == "feedback":
+                subject = "Новое сообщение обратной связи"
+            elif form_type == "presentation_order":
+                subject = "Новый заказ презентации"
+            else:
+                subject = "Новое сообщение"
+            message_body = f"""
+            Фамилия: {middle_name}
+            Имя: {first_name}
+            Отчество: {last_name}
+            Телефон: {phone}
+            Почта: {email}
+            Компания: {company}
+            Должность: {position}
+            Сообщение: {message}
+            """
+            from_email = "medmindes@mail.ru"
+            recipient_list = ["medmindes@mail.ru"]
+
+            send_mail(
+                subject, message_body, from_email, recipient_list, fail_silently=False
+            )
+            return JsonResponse(
+                {"status": "success", "message": "Сообщение отправлено!"}
+            )
+        except Exception as e:
+            return JsonResponse(
+                {"status": "error", "message": f"Ошибка при отправке: {e}"}
+            )
+    else:
+        return JsonResponse({"status": "error", "message": "Используйте метод POST"})
