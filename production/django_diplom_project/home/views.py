@@ -1,3 +1,4 @@
+from wsgiref.types import FileWrapper
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
@@ -11,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .forms import ProjectForm
 from .models import Project, Visualization
 from .serializers import ProjectSerializer
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from .models import Project
 from fill_methods.CatBoostRegressor_fill import CatBoostRegressor_imputer
 from fill_methods.DecisionTreeRegressor_fill import DecisionTree_imputer
@@ -54,6 +55,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .serializers import LoginSerializer, RegistrationSerializer, UserSerializer
 from django.http import StreamingHttpResponse
 import time
+from .tasks import process_large_data
+from celery.result import AsyncResult
 
 
 class RegistrationAPIView(GenericAPIView):
@@ -286,76 +289,45 @@ def upload_file(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def process_data(request, project_id, method_fill_id, method_scaling_id):
-    # Получаем объект проекта по его идентификатору
-    project = Project.objects.get(pk=project_id)
+    task = process_large_data.delay(project_id, method_fill_id, method_scaling_id)
+    task_id = task.id
 
-    title = project.title
+    return Response({"task_id": task_id}, status=202)
 
-    # Получаем файл CSV из объекта проекта
-    original_csv_file = project.original_csv_file
 
-    # Считываем файл CSV в DataFrame с помощью pandas
-    df = pd.read_csv(original_csv_file)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def download_processed_file(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    processed_file = project.processed_csv_file
 
-    df_encoding = data_encoding(df)
+    # Открываем файл и возвращаем его как HttpResponse
+    with open(processed_file.path, "rb") as file:
+        file_content = file.read()
 
-    all_methods_names = [
-        "mean_fill",
-        "median_fill",
-        "min_fill",
-        "max_fill",
-        "interpolate_fill",
-        "linreg_imputer",
-        "KNN_fill",
-        "DecisionTree_imputer",
-        "RandomForest_imputer",
-        "SVM_imputer",
-        "XGBRegressor_imputer",
-        "CatBoostRegressor_imputer",
-    ]
-
-    all_methods = [
-        mean_fill(df_encoding),
-        median_fill(df_encoding),
-        min_fill(df_encoding),
-        max_fill(df_encoding),
-        interpolate_fill(df_encoding),
-        linreg_imputer(df_encoding),
-        KNN_fill(df_encoding),
-        DecisionTree_imputer(df_encoding),
-        RandomForest_imputer(df_encoding),
-        SVM_imputer(df_encoding),
-        XGBRegressor_imputer(df_encoding),
-        CatBoostRegressor_imputer(df_encoding),
-    ]
-
-    filled_df = all_methods[method_fill_id]
-
-    if method_scaling_id == "standart":
-        scale_df = scaling_standart(filled_df)
-    elif method_scaling_id == "normalize":
-        scale_df = normalization_scale(filled_df)
-
-    # Создаем новый файл CSV с заполненными значениями
-    result_df = scale_df.to_csv(index=False)
-
-    # Создаем временный объект BytesIO для сохранения данных в памяти
-    buffer = BytesIO()
-
-    # Записываем данные CSV в объект BytesIO
-    buffer.write(result_df.encode())
-
-    # Сохраняем обработанный файл в объекте проекта
-    project.processed_csv_file.save(
-        f"{title}_{all_methods_names[method_fill_id]}.csv", buffer
+    response = HttpResponse(
+        file_content,
+        content_type="text/csv",  # Укажите соответствующий MIME-тип для вашего файла
     )
-
-    # Возвращаем созданный файл в ответе
-    response = HttpResponse(result_df, content_type="text/csv")
     response["Content-Disposition"] = (
-        'attachment; filename=f"{title}_{all_methods_names[method_fill_id]}.csv"'
+        f'attachment; filename="{project.processed_csv_file.name}"'
     )
+
     return response
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def check_task_status(request, task_id):
+    result = AsyncResult(task_id)
+
+    if result.ready():
+        if result.successful():
+            return JsonResponse({"status": "SUCCESS", "file_url": result.get()})
+        else:
+            return JsonResponse({"status": "FAILURE", "message": str(result.result)})
+    else:
+        return JsonResponse({"status": "PENDING"})
 
 
 @api_view(["GET"])

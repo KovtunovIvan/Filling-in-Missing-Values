@@ -69,6 +69,16 @@ urlpatterns = [
     ),
     path("reset_password/", views.reset_password, name="reset_password"),
     path("contact/", views.contact_view, name="contact"),
+    path(
+        "download/<int:project_id>/",
+        views.download_processed_file,
+        name="download_processed_file",
+    ),
+    path(
+        "check-task-status/<str:task_id>/",
+        views.check_task_status,
+        name="check_task_status",
+    ),
 ]
 
 urlpatterns += static(
