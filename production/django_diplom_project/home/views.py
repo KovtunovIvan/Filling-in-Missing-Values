@@ -190,61 +190,6 @@ def get_project(request, project_id):
         )
 
 
-"""@api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
-def get_project(request, project_id):
-    try:
-        project = Project.objects.get(pk=project_id)
-        if not project:
-            return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        original_csv_file_url = f'http://127.0.0.1:8000/original-csv-file/{project_id}/'
-        processed_csv_file_url = f'http://127.0.0.1:8000/processed-csv-file/{project_id}/'
-        
-        data = {
-            "id": project.id,
-            "title": project.title,
-            "user": project.user.id,
-            "original_csv_file_url": original_csv_file_url if project.original_csv_file else None,
-            "processed_csv_file_url": processed_csv_file_url if project.processed_csv_file else None,
-            "original_csv_file_name": os.path.basename(project.original_csv_file.name) if project.original_csv_file else None,
-            "processed_csv_file_name": os.path.basename(project.processed_csv_file.name) if project.processed_csv_file else None
-        }
-        
-        return Response(data, status=status.HTTP_200_OK)
-    except Project.DoesNotExist:
-        return Response({"detail": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
-def download_original_csv_file(request, project_id):
-    try:
-        project = Project.objects.get(pk=project_id)
-        if project.original_csv_file:
-            response = HttpResponse(project.original_csv_file, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{project.original_csv_file.name}"'
-            return response
-        else:
-            return HttpResponse("Original CSV file not found", status=404)
-    except Project.DoesNotExist:
-        return HttpResponse("Project not found", status=404)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
-def download_processed_csv_file(request, project_id):
-    try:
-        project = Project.objects.get(pk=project_id)
-        if project.processed_csv_file:
-            response = HttpResponse(project.processed_csv_file, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{project.processed_csv_file.name}"'
-            return response
-        else:
-            return HttpResponse("Processed CSV file not found", status=404)
-    except Project.DoesNotExist:
-        return HttpResponse("Project not found", status=404)"""
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def upload_file(request):
@@ -292,6 +237,11 @@ def process_data(request, project_id, method_fill_id, method_scaling_id):
     task = process_large_data.delay(project_id, method_fill_id, method_scaling_id)
     task_id = task.id
 
+    # Обновляем проект с новым task_id
+    project = Project.objects.get(pk=project_id)
+    project.task_id = task_id
+    project.save()
+
     return Response({"task_id": task_id}, status=202)
 
 
@@ -318,7 +268,15 @@ def download_processed_file(request, project_id):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def check_task_status(request, task_id):
+def check_task_status(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    task_id = project.task_id
+
+    if not task_id:
+        return JsonResponse(
+            {"status": "No task associated with this project."}, status=400
+        )
+
     result = AsyncResult(task_id)
 
     if result.ready():

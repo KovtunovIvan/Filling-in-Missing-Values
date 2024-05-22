@@ -77,4 +77,7 @@ def process_large_data(project_id, method_fill_id, method_scaling_id):
     with open(processed_file_path, "w") as file:
         file.write(result_df)
 
+    project.task_id = process_large_data.request.id
+    project.save()
+
     return processed_file_path

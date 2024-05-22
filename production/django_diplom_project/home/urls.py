@@ -75,7 +75,7 @@ urlpatterns = [
         name="download_processed_file",
     ),
     path(
-        "check-task-status/<str:task_id>/",
+        "check-task-status/<int:project_id>/",
         views.check_task_status,
         name="check_task_status",
     ),

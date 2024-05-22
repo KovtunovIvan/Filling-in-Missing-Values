@@ -64,6 +64,7 @@ class User(AbstractUser):
 
 
 class Project(models.Model):
+    task_id = models.CharField(max_length=255, null=True, blank=True)
     title = models.CharField(max_length=100)
     user = models.ForeignKey("User", on_delete=models.CASCADE)
     original_csv_file = models.FileField(
