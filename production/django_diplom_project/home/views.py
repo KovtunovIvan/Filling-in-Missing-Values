@@ -139,7 +139,9 @@ class UserAPIView(RetrieveUpdateAPIView):
 @permission_classes([IsAuthenticated])
 def list_projects(request):
     user = request.user  # Получаем текущего авторизованного пользователя
-    projects = Project.objects.filter(user=user)  # Фильтруем проекты по пользователю
+    projects = Project.objects.filter(user=user).order_by(
+        "id"
+    )  # Фильтруем проекты по пользователю
     serializer = ProjectSerializer(projects, many=True)
     return Response(serializer.data)
 
