@@ -73,3 +73,19 @@ export const getBoxPlot = (id, columnName) => {
     responseType: "arraybuffer"
   });
 }
+
+export const checkTaskStatus = (id) => {
+  const auth = authHeader();
+  const path = `check-task-status/${id}/`;
+  return instance.get(path, {
+    headers: auth,
+  });
+}
+
+export const deleteProjectById = (id) => {
+  const auth = authHeader();
+  const path = `delete-project/${id}/`;
+  return instance.delete(path, {
+    headers: auth,
+  });
+}

@@ -1,32 +1,31 @@
-import { LocalStorageTools } from "../localStorage";
-import { userCheck } from "../api/userApi"
-import { setUser } from "../redux/userData";
-import { useDispatch } from "react-redux";
-import { jwtDecode } from "jwt-decode";
-import { useLoaderData, redirect } from "react-router-dom";
-
-export const userLoader = async ({request, params}) => {
-    //testing
-    console.log("FETCHING!");
-
-    const isUser = LocalStorageTools.getItemFromLocalStorage('tokens') ? true : false;
-    if(isUser){
-      const tokens = LocalStorageTools.getItemFromLocalStorage('tokens');
-      const userInfo = tokens ? jwtDecode(tokens.access) : null;
-      return await userCheck(userInfo.user_id);
-    }
-    return redirect("/u/login");
-}
+import { useEffect, useState } from "react";
+import { fetchUser } from "../redux/userData";
+import { useDispatch, useSelector } from "react-redux";
+import { Loader } from "../components/optional/Loader";
 
 
 export function PrivateRoute({ children }) {
-    const data = useLoaderData().data;
-    const dispatch = useDispatch();
-    if(data) {
-      dispatch(setUser(data));
-  }
-    //testing
-    console.log(data);
 
-    return children;
+  const projectListStatus = useSelector((state) => state.userData.status)
+  const [isLoading, setloading] = useState(true);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+      if(projectListStatus === 'idle'){
+          dispatch(fetchUser())
+      }
+      if(projectListStatus === 'loading') {
+          setloading(true);
+      }
+      if(projectListStatus === 'succeeded') {
+          setloading(false);
+      }
+  }, [projectListStatus, dispatch])
+
+    return (
+      <>
+        { isLoading ? <Loader active={isLoading} /> : children }
+      </>
+
+    )
   }

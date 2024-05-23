@@ -24,11 +24,13 @@ function ContactLinks() {
             />
         </Link>
         <div className='footer-email'>
-            info@medminds.com
+            medmindes@mail.ru
         </div>
-        <Link to='/platform/contacts' className='footer-contacts'>
-            Все контакты
-        </Link>
+        <div className='footer-contacts'>
+            <Link to='/platform/contacts' style={{color:"#FFFFFF"}}>
+                Все контакты
+            </Link>
+        </div>
     </div>
     )
 }
@@ -36,12 +38,16 @@ function ContactLinks() {
 function ContactButtoms() {
     return (
         <div className='footer-buttons'>
-            <Link to='/platform/feedback' className='button button_default'>
-                Обратная связь
-            </Link>
-            <Link to='/platform/presentation' className='button button_dark-mode'>
-                Заказать презентацию
-            </Link>
+            <div className='footer-buttons__single-button'>
+                <Link to='/platform/feedback' className='button button_default'>
+                    Обратная связь
+                </Link>
+            </div>
+            <div className='footer-buttons__single-button'>
+                <Link to='/platform/presentation' className='button button_dark-mode'>
+                    Заказать презентацию
+                </Link>
+            </div>
         </div>
     )
 }

@@ -14,6 +14,7 @@ import pos_img4 from '../../theme/img/main/pos-icon4.svg';
 import pos_img5 from '../../theme/img/main/pos-icon5.svg';
 import pos_img6 from '../../theme/img/main/pos-icon6.svg';
 import step_line_img  from '../../theme/img/main/step.svg';
+import step_line_img_vertical  from '../../theme/img/main/step_vertical.svg';
 import start_using_picture from '../../theme/img/main/start-using.png';
 import start_using_logo from '../../theme/img/main/start-using-logo.svg';
 
@@ -71,7 +72,7 @@ const possibilitiesCards = [
     },
 ]
 
-function Root() {
+export function Root() {
     return (
         <>
             <Header/>
@@ -125,10 +126,12 @@ function ShowVideo(){
             <div className='root__show-video__headline2'>
                 и оцените, подойдет ли вам наше решение
             </div>
+            {
+                // <div className='root__show-video__content'>
 
-            <div className='root__show-video__content'>
-
-            </div>
+                // </div>
+            }
+            <div className='test' style={{textAlign: 'center'}}> Здесь должно быть видео</div>
         </>
     )
 }
@@ -140,59 +143,75 @@ function Steps() {
                 Процесс анализа данных
             </div>
             <div className='root__steps-wrapper'>
-                <div className='root__steps__1-2'>
-                    <div className='root__steps__head'>
-                        <div className='root__steps__number'>
-                            1
+                <img src={step_line_img_vertical} className="root__steps__line_vertical" alt="line" />
+                <div className='root__steps_vertical'>
+                    <div className='root__steps__1-2'>
+                        <div className='root__steps__head'>
+                            <div className='root__steps__head__single-stap'>
+                                <div className='root__steps__head__single-stap__number'>
+                                    1
+                                </div>
+                                <div className='root__steps__head__single-stap__text'>
+                                    {steps[0]}
+                                </div>
+                            </div>
+                            <div className='root__steps__head__single-stap'>
+                                <div className='root__steps__head__single-stap__number'>
+                                    2
+                                </div>
+                                <div className='root__steps__head__single-stap__text'>
+                                    {steps[1]}
+                                </div>
+                            </div>
                         </div>
-                        <div className='root__steps__text'>
-                            {steps[0]}
-                        </div>
-                        <div className='root__steps__number'>
-                            2
-                        </div>
-                        <div className='root__steps__text'>
-                            {steps[1]}
-                        </div>
+                        <img src={step_line_img} className="root__steps__line" alt="line" />
                     </div>
-                    <img src={step_line_img} className="root__steps__line" alt="line" />
-                </div>
 
-                <div className='root__steps__3-4'>
-                    <div className='root__steps__head'>
-                        <div className='root__steps__number'>
-                            3
+                    <div className='root__steps__3-4'>
+                        <div className='root__steps__head'>
+                            <div className='root__steps__head__single-stap'>
+                                <div className='root__steps__head__single-stap__number'>
+                                    3
+                                </div>
+                                <div className='root__steps__head__single-stap__text'>
+                                    {steps[2]}
+                                </div>
+                            </div>
+                            <div className='root__steps__head__single-stap'>
+                                <div className='root__steps__head__single-stap__number'>
+                                    4
+                                </div>
+                                <div className='root__steps__head__single-stap__text'>
+                                    {steps[3]}
+                                </div>
+                            </div>
                         </div>
-                        <div className='root__steps__text'>
-                            {steps[2]}
-                        </div>
-                        <div className='root__steps__number'>
-                            4
-                        </div>
-                        <div className='root__steps__text'>
-                            {steps[3]}
-                        </div>
+                        <img src={step_line_img} className="root__steps__line" alt="line" />
                     </div>
-                    <img src={step_line_img} className="root__steps__line" alt="line" />
-                </div>
 
-                <div className='root__steps__5-6'>
-                    <div className='root__steps__head'>
-                        <div className='root__steps__number'>
-                            5
+                    <div className='root__steps__5-6'>
+                        <div className='root__steps__head'>
+                            <div className='root__steps__head__single-stap'>
+                                <div className='root__steps__head__single-stap__number'>
+                                    5
+                                </div>
+                                <div className='root__steps__head__single-stap__text'>
+                                    {steps[4]}
+                                </div>
+                            </div>
+                            <div className='root__steps__head__single-stap'>
+                                <div className='root__steps__head__single-stap__number'>
+                                    6
+                                </div>
+                                <div className='root__steps__head__single-stap__text'>
+                                    {steps[5]}
+                                </div>
+                            </div>
                         </div>
-                        <div className='root__steps__text'>
-                            {steps[4]}
-                        </div>
-                        <div className='root__steps__number'>
-                            6
-                        </div>
-                        <div className='root__steps__text'>
-                            {steps[5]}
-                        </div>
+                        <img src={step_line_img} className="root__steps__line" alt="line" />
                     </div>
-                    <img src={step_line_img} className="root__steps__line" alt="line" />
                 </div>
+                
             </div>
         </>
         
@@ -308,5 +327,3 @@ function Preview() {
         </div>
     )
 }
-
-export { Root };

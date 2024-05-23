@@ -38,7 +38,7 @@
 }
 
 .success-main-submit__title{
-  font-size: 2em;
+  font-size: 1.8em;
   font-weight: bold;
   color: var(--main-headline-color);
   text-align: center;
@@ -68,4 +68,5 @@
   color: var(--main-text-color);
   font-weight: 600;
   padding-left: 30px;
+  cursor: pointer;
 }

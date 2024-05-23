@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { getFileByUrl } from "../../api/projectApi"
 
-function ProjectConfig(props) {
+export function ProjectConfig(props) {
     const {isProcessed, getter, setter} = props;
 
     const fileNameSource = useSelector((state) => state.projectData.original_csv_file_name);
@@ -121,6 +121,3 @@ function ProjectConfig(props) {
         </div>
     )
 }
-
-
-export {ProjectConfig}

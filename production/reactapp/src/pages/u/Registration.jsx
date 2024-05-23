@@ -9,7 +9,7 @@ import line from "../../theme/img/forms/line-reg.svg"
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
 
-function Registration() {
+export function Registration() {
     return (
         <div className='form-container'>
             <FormReg/>
@@ -324,6 +324,3 @@ function FormReg() {
         </form>
     )
 }
-
-
-export { Registration };

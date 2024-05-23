@@ -1,51 +1,64 @@
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLoaderData } from "react-router-dom";
-
-import { getProjectByID } from "../../api/projectApi" 
 import { ProjectConfig } from "../../components/app/ProjectConfiguration";
 import { ProcessingSettings } from "../../components/app/ProcessingSettings";
-import { Visualization, getPicture } from "../../components/app/Visualization";
-import { useEffect, useState } from "react";
-import { setProject, resetProject } from "../../redux/projectData";
-import { useDispatch, useSelector } from "react-redux";
+import { Visualization } from "../../components/app/Visualization";
+import { fetchProject, fetchProjectTaskStatus } from "../../redux/projectData";
+import { Loader } from "../../components/optional/Loader";
 
 export const OneProjectLoader = async ({request, params}) => {
     if(params){
-        const response = await getProjectByID(params.id);
-        return response;   
+        return params.id;
     } else {
         return null;
     }
 }
 
 function Project() {
-    const response = useLoaderData();
-
-    //testing
-    console.log(response)
-
+    const id = useLoaderData();
     const dispatch = useDispatch();
-    if(response){
-        dispatch(setProject(response));
-    } else {
-        dispatch(resetProject);
-    }
-
+    const projectStatus = useSelector((state) => state.projectData.status);
+    const projectTaskStatus = useSelector((state) => state.projectData.task_status);
+    const [isLoading, setloading] = useState(true);
     const isProcessed = useSelector((state) => state.projectData.processed_csv_file_name) ? true : false;
-    console.log(isProcessed)
-    
     const initialIndexState = isProcessed ? 1 : 0;
     const [activeIndex, setActiveIndex] = useState(initialIndexState);
     const [isProcessingDisable, setIsProcessingDisable] = useState(true);
 
-    useEffect(()=> {
+    useEffect(() => {
+        if(projectTaskStatus === 'idle'){
+            dispatch(fetchProjectTaskStatus(id))
+        }
+        if(projectStatus === 'loading' || projectTaskStatus === 'loading') {
+            setloading(true);
+        }
+        if(projectStatus === 'succeeded' && projectTaskStatus === 'succeeded') {
+            setloading(false);
+        }
+    }, [projectStatus, projectTaskStatus, dispatch, activeIndex, id])
+
+    useEffect(()=>{
         if(activeIndex === 1){
             setIsProcessingDisable(true);
         } else {
             setIsProcessingDisable(false);
         }
-    }, [activeIndex])
+    }, [projectStatus, activeIndex])
 
-    console.log(activeIndex);
+    useEffect(()=>{
+        if(isProcessed){
+            setActiveIndex(1);
+        } else {
+            setActiveIndex(0)
+        }
+    }, [isProcessed])
+
+    useEffect(() => {
+        if(projectStatus === 'idle' && projectTaskStatus === 'succeeded'){
+            dispatch(fetchProject(id))
+        }
+    }, [projectTaskStatus, projectStatus, dispatch, id])
 
     function handleSwitchActive(index) {
         setActiveIndex(index);
@@ -56,8 +69,8 @@ function Project() {
     }
 
     return (
-        <div className="project-config-container">
             <div className="project-config-wrapper">
+                <Loader active={isLoading} />
                 <ProjectConfig 
                     isProcessed={isProcessed}
                     getter={getActiveIndex}
@@ -66,7 +79,6 @@ function Project() {
                 <ProcessingSettings disabled={isProcessingDisable}/>
                 <Visualization/>
             </div>
-        </div>
     )
 }
 

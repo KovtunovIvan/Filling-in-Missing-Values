@@ -1,4 +1,4 @@
-function SelectOption(props) {
+export function SelectOption(props) {
     const {label, name, id, list, disabled} = props;
     const optionsList = list.map((item) => {
         return (
@@ -30,10 +30,6 @@ function SelectOption(props) {
                     </select>                )
             }
             </div>
-
         </div>
     )
 }
-
-
-export {SelectOption}

@@ -1,6 +1,7 @@
 import { useLocation, Navigate } from "react-router-dom";
 import { LocalStorageTools } from "../localStorage";
 
+
 export function GuestRoute({ children }) {
   const isUser = LocalStorageTools.getItemFromLocalStorage('tokens') ? true : false;
     let location = useLocation();

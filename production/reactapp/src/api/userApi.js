@@ -65,22 +65,16 @@ export const deleteAvatar = async () => {
 
 export const updateProfile = async (formData) => {
   const auth = authHeader();
-  const middle_name = formData.get("middle_name");
-  const first_name = formData.get("first_name");
-  const last_name = formData.get("last_name");
-  const phone_number = formData.get("phone_number");
-  const path = `update-profile/${first_name}/${last_name}/${middle_name}/${phone_number}/`;
+  const path = `update-profile/`;
   const response = await instance.put(path, formData, {
       headers: auth,
-    });
+  });
   return response;
 }
 
 export const changePassword = async (formData) => {
   const auth = authHeader();
-  const old_password = formData.get("old_password");
-  const new_password = formData.get("new_password");
-  const path = `change-password/${old_password}/${new_password}/`;
+  const path = `change-password/`;
   const response = await instance.put(path, formData, {
     headers: auth,
   });
@@ -89,15 +83,30 @@ export const changePassword = async (formData) => {
 
 export const deleteProfile = async (formData) => {
   const auth = authHeader();
-  const password = formData.get("password");
-  const path = `delete-profile/${password}/`;
-  const response = await instance.delete(path, {
+  const path = `delete-profile/`;
+  const response = await instance.delete(path, formData, {
     headers: auth,
-    body: { password: password }
   });
   return response;
 }
 
 export const restorePassword = async (email) => {
-  return {ok: true};
+  const path = 'reset_password/'
+  const formData = await new FormData();
+  console.log(email)
+  await formData.append("email", email)
+  const response = await instance.post(path, formData);
+  return response;
+}
+
+export const sendFeedBack = async (formData) => {
+  const path = 'contact/'
+  const response = await instance.post(path, formData);
+  return response;
+}
+
+export const sendPresentationOrder = async (formData) => {
+  const path = 'contact/'
+  const response = await instance.post(path, formData);
+  return response;
 }

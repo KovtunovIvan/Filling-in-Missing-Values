@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import { flushSync } from "react-dom";
-import { Outlet, ScrollRestoration } from "react-router-dom";
-import { useLocation, Navigate } from "react-router-dom";
-import { Link, NavLink, useMatch } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { Outlet, ScrollRestoration, NavLink, } from "react-router-dom";
+import { useClickOutside } from "../../hooks/useClickOutside";
+
 
 export const articlesList = [
     {
@@ -113,8 +112,7 @@ export const giudeChildrenRoutes =  [
       },
 ]
 
-function Guide() {
-
+export function Guide() {
     return (
         <div className='guide-main-wrapper wrapper'>
             <GuideNavigation articles={articlesList}/>
@@ -154,6 +152,15 @@ export function GiudeContent(props) {
 
 function GuideNavigation(props) {
     const {articles} = props;
+    const [isActiveMenu, setIsActiveMenu] = useState(false);
+
+    function handleClickMenuButton() {
+        setIsActiveMenu(prevState => !prevState)
+    }
+
+    function handleClickHideMenu() {
+        setIsActiveMenu(false)
+    }
     const [active, setActive] = useState(0);
     const navItems = articles.map((item) => {
         return (
@@ -162,20 +169,32 @@ function GuideNavigation(props) {
                 id={item.id} 
                 children={item.children}
                 hendleChangeActive={() => {setActive(item.id)}}
+                handleHideMenu={ handleClickHideMenu }
                 active={active}
             />
         )
     });
 
+    const wrapRef = useRef(null);
+    useClickOutside(wrapRef, handleClickHideMenu);
+
     return (
-        <div className="guide-nav-container">
-            {navItems}
+        <div className="guide-menu-wrapper" ref={wrapRef}>
+            <div className={isActiveMenu ? "guide-nav-container guide-nav-container_active": "guide-nav-container"}>
+                {navItems}
+            </div>
+            <div 
+                className={isActiveMenu ? "guide-menu-button guide-menu-button_active" : "guide-menu-button" }
+                onClick={handleClickMenuButton}
+            >
+                <span className="arrow arrow-right"/>
+            </div>
         </div>
     )
 }
 
 function Lable(props) {
-    const {main, id, children, hendleChangeActive, active} = props;
+    const {main, id, children, hendleChangeActive, handleHideMenu, active} = props;
 
     const ischildren = children.length !== 0;
     const dropdowns = !ischildren ? null : children.map((child) => {
@@ -185,6 +204,7 @@ function Lable(props) {
                     isActive ? 
                     "guide-nav__child-link guide-nav__child-link_active" 
                     : "guide-nav__child-link"}
+                    onClick={handleHideMenu}
                 key={child.id}
             >
                 {child.navItem}
@@ -206,6 +226,7 @@ function Lable(props) {
     const henldeOpen = (e) => {
         setIsOpen(!isOpen)
         hendleChangeActive(id);
+        handleHideMenu();
     }
 
     //const path = id === 0 ? "/platform/guide/" : `/platform/guide/${id}`;
@@ -243,6 +264,3 @@ function Lable(props) {
 
     )
 }
-
-
-export { Guide };

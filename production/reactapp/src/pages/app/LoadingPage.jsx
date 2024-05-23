@@ -1,6 +1,6 @@
-function LoadingPage() {
-    return <div>Loading!</div>
+import { Loader } from "../../components/optional/Loader"
+
+
+export function LoadingPage() {
+    return <Loader active={true}/>
 }
-
-
-export { LoadingPage }

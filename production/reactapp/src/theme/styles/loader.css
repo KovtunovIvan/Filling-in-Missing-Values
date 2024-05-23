@@ -1,0 +1,37 @@
+.loader{
+  height: 100vh;
+  width: 100vw;
+  z-index: 100;
+  background-color: rgba(0,0,0,0.3);
+  position:fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+.loader.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.loader__content{
+  transform: scale(0.5);
+  transition: 0.2s all;
+}
+
+.loader__content.active {
+  transform: scale(1);
+
+}
+
+.loader__content__text{
+  font-size: 1.5em;
+  font-weight: 650;
+  color: var(--main-headline-color);
+  text-align: center;
+}

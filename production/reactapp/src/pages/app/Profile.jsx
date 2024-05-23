@@ -1,6 +1,6 @@
-import { Form, json, redirect, useActionData, useSubmit } from "react-router-dom";
+import { Form, json, redirect, useFetcher } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import eyeOpen from "../../theme/img/forms/eye-open.svg"
 import eyeOff from "../../theme/img/forms/eye-off.svg"
 import uploadIcon from "../../theme/img/profile/button_upload_avatar.svg"
@@ -10,6 +10,8 @@ import { changePassword, deleteAvatar, deleteProfile, getAvatarByURL, updateProf
 import userPhoto from "../../theme/img/app/avatar.svg"
 import { Modal } from "../../components/app/Modal";
 import { LocalStorageTools } from "../../localStorage";
+import { Loader } from "../../components/optional/Loader";
+import { fetchUser } from "../../redux/userData";
 
 const PHONE_NUMBER_REGEXP = /^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/
 
@@ -43,101 +45,95 @@ const personalDataFuilds = [
     },
 ]
 
+const SuccessUpdateProfileModal = {
+    title: "Успешно!",
+    msg: "Изменения в данных профиля сохранены.",
+};
+
+const ServerErrorModal = {
+    title: "Неизвестная ошибка!",
+    msg: "Пожалуйста, перезагрузите страницу или спустя 1-2 минуты попробуйте снова.",
+};
+
+const InvalidPasswordModal = {
+    title: " Ошибка!",
+    msg: (<>Пароль неверный.<br/>Введите корректный пароль.</>),
+};
+
+const IncorrectPassLengthModal = {
+    title: "Ошибка!",
+    msg: "Пароль должен содержать не менее 8 символов.",
+};
+
+const IncorrectPhoneFormatModal = {
+    title: "Ошибка!",
+    msg: (<>Неккоректный формат номера телефона.<br/>Пример: +7(000)000-00-00</>),
+};
+
+const PassMatchErrorModal = {
+    title: "Ошибка!",
+    msg: "Введённые пароли не совпадают.",
+};
+
 
 export function Profile() {
-    const SuccessUpdateProfileModal = {
-        title: "Успешно!",
-        msg: "Изменения в данных профиля сохранены.",
-    };
+    return (
+        <div className="profile-wrapper">
+            <div className="profile-wrapper__grid-pos-1">
+                <AvatarSettings/>
+            </div>
+            <div className="profile-wrapper__grid-pos-2">
+                <PersonalDataSettings />
+            </div>
+            <div className="profile-wrapper__grid-pos-3">
+                <PasswordChange />
+            </div>
+            <div className="profile-wrapper__grid-pos-4">
+                <DeleteProfile />
+            </div>
+        </div>
+    )
+}
 
-    const ServerErrorModal = {
-        title: "Неизвестная ошибка!",
-        msg: "Пожалуйста, перезагрузите страницу или спустя 1-2 минуты попробуйте снова.",
-    };
-    
-    const InvalidPasswordModal = {
-        title: " Ошибка!",
-        msg: (<>Пароль неверный.<br/>Введите корректный пароль.</>),
-    };
+function AvatarSettings() {
+    const dispatch = useDispatch();
+    const uploudedAvatarUrl = useSelector((state) => state.userData.avatar);
+    let avatarSrc = uploudedAvatarUrl ? getAvatarByURL(uploudedAvatarUrl): userPhoto;
+    const deleteAvatarButtonStyle = uploudedAvatarUrl ? deleteIcon_active : deleteIcon_disable;
 
-    const IncorrectPassLengthModal = {
-        title: "Ошибка!",
-        msg: "Пароль должен содержать не менее 8 символов.",
-    };
-
-    const IncorrectPhoneFormatModal = {
-        title: "Ошибка!",
-        msg: (<>Неккоректный формат номера телефона.<br/>Пример: +7(000)000-00-00</>),
-    };
-
-    const PassMatchErrorModal = {
-        title: "Ошибка!",
-        msg: "Введённые пароли не совпадают.",
-    };
+    const fetcher = useFetcher()
+    const [isLoading, setloading] = useState(false);
 
     const [modalActive, setModalActive] = useState(false);
     const [modalContent, setModelContent] = useState(ServerErrorModal);
-    
-    const actionData = useActionData();
-    useEffect(()=> {
-        if(actionData){
-            const { intent, msg } = actionData;
+
+    useEffect(()=>{
+        if(fetcher.state === 'submitting'){
+            setloading(true);
+        } else {
+            setloading(false);
+        }
+
+        avatarSrc = uploudedAvatarUrl ? getAvatarByURL(uploudedAvatarUrl): userPhoto;
+
+        if(fetcher.data){
+            const { intent, msg } = fetcher.data;
+            console.log(intent)
             switch(intent) {
-                //Изменить личные данные
-                case "update_profile": 
-                    if(msg === "Incorrect phone number"){
-                        setModelContent(IncorrectPhoneFormatModal);
-                        setModalActive(true)
-                    }
-                    if(msg === "OK"){
-                        setModelContent(SuccessUpdateProfileModal);
-                        setModalActive(true)
-                    }
-                    break;
-                //Изменить пароль
-                case "change_password":
-                    if(msg === "OK"){
-                        setModelContent(SuccessUpdateProfileModal);
-                        setModalActive(true)
-                    }
-                    if(msg === "Invalid old password"){
-                        setModelContent(InvalidPasswordModal);
-                        setModalActive(true)
-                    }
-                    if(msg === "Incorrect password length"){
-                        setModelContent(IncorrectPassLengthModal);
-                        setModalActive(true)
-                    }
-                    if(msg === "Passwords don't match"){
-                        setModelContent(PassMatchErrorModal);
-                        setModalActive(true)
-                    }
-                    break;
-                //Удалить профиль
-                case "delete_profile":
-                    if(msg === "incorrect password length"){
-                        setModelContent(IncorrectPassLengthModal);
-                        setModalActive(true)
-                    }
-                    if(msg === "Invalid password"){
-                        setModelContent(InvalidPasswordModal);
-                        setModalActive(true)
-                    }
-                    if(msg === "Passwords don't match"){
-                        setModelContent(PassMatchErrorModal);
-                        setModalActive(true)
-                    }
-                    break;
                 //Загрузить аватар
                 case "add_avatar":
-                    if(msg !== "OK"){
+                    if(msg === "OK"){
+                        dispatch(fetchUser());
+                    } else {
                         setModelContent(ServerErrorModal);;
                         setModalActive(true);
                     }
                     break;
                 //Удалить аватар
                 case "delete_avatar":
-                    if(msg !== "OK"){
+                    if(msg === "OK"){
+                        dispatch(fetchUser());
+                    } else {
                         setModelContent(ServerErrorModal);;
                         setModalActive(true);
                     }
@@ -147,59 +143,11 @@ export function Profile() {
                     setModalActive(true);
             }
         }
-    }, [actionData])
 
-    return (
-        <>
-            <div className="profile-wrapper">
-                <div className="profile-wrapper__grid-pos-1">
-                    <AvatarSettings/>
-                </div>
-                <div className="profile-wrapper__grid-pos-2">
-                    <PersonalDataSettings />
-                </div>
-                <div className="profile-wrapper__grid-pos-3">
-                    <PasswordChange />
-                </div>
-                <div className="profile-wrapper__grid-pos-4">
-                    <DeleteProfile />
-                </div>
-            </div>
-            <Modal 
-                active={modalActive}
-                setActive={setModalActive}
-            > 
-                <div className="modal__content__title">
-                    {modalContent.title}
-                </div>
-                <div className="modal__content__msg">
-                    {modalContent.msg}
-                </div>
-                <div className="modal__content__bottom">
-                    <button
-                        className="button button_default modal__content__button_ok"
-                        onClick={() => setModalActive(false)}>
-                        OK
-                    </button>
-                </div>
-            </Modal>
-        </>
-    )
-}
-
-function AvatarSettings() {
-    const uploudedAvatarUrl = useSelector((state) => state.userData.avatar);
-    let src = uploudedAvatarUrl ? getAvatarByURL(uploudedAvatarUrl): userPhoto;
-    const deleteAvatarButtonStyle = uploudedAvatarUrl ? deleteIcon_active : deleteIcon_disable;
-    const submit = useSubmit();
-
-
-    useEffect(()=>{
-        src = uploudedAvatarUrl ? getAvatarByURL(uploudedAvatarUrl): userPhoto;
-    }, [src, uploudedAvatarUrl])
+    }, [fetcher])
 
     function handleUpload(e) {
-        submit(e.currentTarget,{
+        fetcher.submit(e.currentTarget,{
             method: "post",
             action: "/app/profile",
           });
@@ -207,7 +155,7 @@ function AvatarSettings() {
 
     function handleDelete(e) {
         if(uploudedAvatarUrl) {
-            submit(e.currentTarget,{
+            fetcher.submit(e.currentTarget,{
                 method: "delete",
                 action: "/app/profile",
               });
@@ -215,66 +163,93 @@ function AvatarSettings() {
     }
 
 return (
-    <div className="profile___inner-wrapper">
-        <div className="profile___inner-wrapper__flex">
-        <div className="profile___avatar-settings__avatar">
-            <img 
-                className="profile___avatar-settings__avatar__img"
-                src={src} 
-                alt="avatar" 
-            />
-        </div>
+    <> 
+        <Modal 
+            active={modalActive}
+            setActive={setModalActive}
+        > 
+            <div className="modal__content__title">
+                {modalContent.title}
+            </div>
+            <div className="modal__content__msg">
+                {modalContent.msg}
+            </div>
+            <div className="modal__content__bottom">
+                <button
+                    className="button button_default modal__content__button_ok"
+                    onClick={() => setModalActive(false)}>
+                    OK
+                </button>
+            </div>
+        </Modal>
+        <Loader active={isLoading} />
+        <div className="profile___inner-wrapper">
+            <div className="profile___inner-wrapper__flex">
+            <div className="profile___avatar-settings__avatar">
+                <img 
+                    className="profile___avatar-settings__avatar__img"
+                    src={avatarSrc} 
+                    alt="avatar" 
+                />
+            </div>
 
-        <Form 
-            id="avatar-upload-form"
-            className="profile___avatar-settings__button-wrapper"
-            onChange={handleUpload}
-        >
-            <input 
-                type="file" 
-                name="upload-avatar"
-                accept={acceptFiles}
-                id="upload-avatar"
-                className='profile___avatar-settings__button_upload'
-            />
-            <input name="intent" value="add_avatar" className="profile___avatar-settings__button_upload"/>
-            <label for="upload-avatar" className="profile___avatar-settings__button__label-wrapper">
+            <Form 
+                id="avatar-upload-form"
+                className="profile___avatar-settings__button-wrapper"
+                onChange={handleUpload}
+            >
+                <input 
+                    type="file" 
+                    name="upload-avatar"
+                    accept={acceptFiles}
+                    id="upload-avatar"
+                    className='profile___avatar-settings__button_upload'
+                />
+                <input name="intent" value="add_avatar" className="profile___avatar-settings__button_upload"/>
+                <label for="upload-avatar" className="profile___avatar-settings__button__label-wrapper">
+                        <img 
+                            className="profile___avatar-settings__button__label__icon"
+                            src={uploadIcon} 
+                            alt="icon"
+                        />
+                    <div className="profile___avatar-settings__button__label__text">
+                        Загрузить фото
+                    </div>
+                </label>
+
+            </Form>
+            <Form 
+                id="avatar-delete-form"
+                method="DELETE"
+                className="profile___avatar-settings__button-wrapper"
+                onClick={handleDelete}
+            >
+                <label for="delete-avatar" className="profile___avatar-settings__button__label-wrapper">
                     <img 
                         className="profile___avatar-settings__button__label__icon"
-                        src={uploadIcon} 
+                        src={deleteAvatarButtonStyle} 
                         alt="icon"
                     />
+                <input name="intent" value="delete_avatar" className="profile___avatar-settings__button_upload"/>
                 <div className="profile___avatar-settings__button__label__text">
-                    Загрузить фото
+                    Удалить фото
                 </div>
-            </label>
-
-        </Form>
-        <Form 
-            id="avatar-delete-form"
-            method="DELETE"
-            className="profile___avatar-settings__button-wrapper"
-            onClick={handleDelete}
-        >
-            <label for="delete-avatar" className="profile___avatar-settings__button__label-wrapper">
-                <img 
-                    className="profile___avatar-settings__button__label__icon"
-                    src={deleteAvatarButtonStyle} 
-                    alt="icon"
-                />
-            <input name="intent" value="delete_avatar" className="profile___avatar-settings__button_upload"/>
-            <div className="profile___avatar-settings__button__label__text">
-                Удалить фото
+                </label>
+            </Form>
             </div>
-            </label>
-        </Form>
         </div>
-    </div>
+    </>
+    
 )
 }
 
 
 function PersonalDataSettings(props){
+    const fetcher = useFetcher()
+    const [isLoading, setloading] = useState(false);
+
+    const [modalActive, setModalActive] = useState(false);
+    const [modalContent, setModelContent] = useState(ServerErrorModal);
     
     const initialFormDataState = {
         middle_name: useSelector((state) => state.userData.middle_name),
@@ -284,6 +259,30 @@ function PersonalDataSettings(props){
         phone_number: useSelector((state) => state.userData.phone_number),
     };
 
+    useEffect(()=>{
+        if(fetcher.state === 'submitting'){
+            console.log(fetcher.state)
+            setloading(true);
+        } else {
+            setloading(false);
+        }
+    }, [fetcher.state])
+
+    
+    useEffect(()=>{
+        if(fetcher.data){
+            const { intent, msg } = fetcher.data;
+            if(msg === "Incorrect phone number"){
+                setModelContent(IncorrectPhoneFormatModal);
+                setModalActive(true)
+            }
+            if(msg === "OK"){
+                setModelContent(SuccessUpdateProfileModal);
+                setModalActive(true)
+            }
+        }
+    }, [fetcher.data])
+
     const [formData, setFormData] = useState(initialFormDataState);
     const handleChange = (event) => {
         const {name, value} = event.target;
@@ -292,7 +291,7 @@ function PersonalDataSettings(props){
             [name]: value
         }));
     }
-
+    
     const fuilds = personalDataFuilds.map((item, index) => {
         const value = formData[item.name];
         if(item.name === "email"){
@@ -334,29 +333,56 @@ function PersonalDataSettings(props){
     })
 
     return (
-        <div className="profile___inner-wrapper">
-            <div className="profile__headline">
-                Личные данные
-            </div>
-            <Form 
-                method="PUT"
-                className="profile___personal-settings__fuilds-container"
-            >
-                {fuilds}
-                <button 
-                    className="button button_default button_center"
-                    type="submit"
-                    name="intent"  
-                    value="update_profile"
+        <>
+            <Modal 
+                active={modalActive}
+                setActive={setModalActive}
+            > 
+                <div className="modal__content__title">
+                    {modalContent.title}
+                </div>
+                <div className="modal__content__msg">
+                    {modalContent.msg}
+                </div>
+                <div className="modal__content__bottom">
+                    <button
+                        className="button button_default modal__content__button_ok"
+                        onClick={() => setModalActive(false)}>
+                        OK
+                    </button>
+                </div>
+            </Modal>
+            <Loader active={isLoading} />
+
+            <div className="profile___inner-wrapper">
+                <div className="profile__headline">
+                    Личные данные
+                </div>
+                <fetcher.Form 
+                    method="PUT"
+                    className="profile___personal-settings__fuilds-container"
                 >
-                        Сохранить
-                </button>
-            </Form>
-        </div>
+                    {fuilds}
+                    <button 
+                        className="button button_default button_center"
+                        type="submit"
+                        name="intent"  
+                        value="update_profile"
+                    >
+                            Сохранить
+                    </button>
+                </fetcher.Form>
+            </div>
+        </>
     )
 }
 
 function PasswordChange(){
+    const fetcher = useFetcher()
+    const [isLoading, setloading] = useState(false);
+
+    const [modalActive, setModalActive] = useState(false);
+    const [modalContent, setModelContent] = useState(ServerErrorModal);
 
     const initialFormDataState = {
         old_password: "",
@@ -372,12 +398,44 @@ function PasswordChange(){
     const [isHiddenRepeat, setIsHiddenRepeat] = useState(true);
 
     useEffect(()=>{
+        if(fetcher.state === 'submitting'){
+            setloading(true);
+        } else {
+            setloading(false);
+        }
+    }, [fetcher.state])
+
+    useEffect(()=>{
         if(formData.old_password !== "" && formData.new_password !== "" && formData.repeat !== ""){
             setIsActive(true)
         } else {
             setIsActive(false);
         }
     }, [formData])
+
+    useEffect(()=>{
+        if(fetcher.data){
+            const { intent, msg } = fetcher.data;
+            console.log(intent)
+                //Изменить пароль
+            if(msg === "OK"){
+                setModelContent(SuccessUpdateProfileModal);
+                setModalActive(true)
+            }
+            if(msg === "Invalid old password"){
+                setModelContent(InvalidPasswordModal);
+                setModalActive(true)
+            }
+            if(msg === "Incorrect password length"){
+                setModelContent(IncorrectPassLengthModal);
+                setModalActive(true)
+            }
+            if(msg === "Passwords don't match"){
+                setModelContent(PassMatchErrorModal);
+                setModalActive(true)
+            }
+        }
+    }, [fetcher.data])
 
     const handleChange = (event) => {
         const {name, value} = event.target;
@@ -388,127 +446,182 @@ function PasswordChange(){
     }
 
     return (
-        <div className="profile___inner-wrapper">
-            <div className="profile__headline profile__headline_center">
-                Изменить пароль
-            </div>
-            <Form 
-                method="PUT"
-                className="profile___personal-settings__fuilds-container_password">
-                <p className="profile_fuild-conteiner_passsword">
-                    <div className='profile__label profile__label_password'>
-                        Старый пароль
-                    </div>
-                    <div 
-                        className="profile__input_password"
-                    >
-                    <input 
-                        className='main-form__password-fuild__input'
-                        type={
-                            isHiddenOldnPassword?
-                            'password'
-                            :'text'
-                        }
-                        name="old_password" 
-                        placeholder='Введите старый пароль'
-                        onChange={handleChange}
-                    />
-                        <img 
-                            className='eye'
-                            src={
+        <>
+            <Modal 
+                active={modalActive}
+                setActive={setModalActive}
+            > 
+                <div className="modal__content__title">
+                    {modalContent.title}
+                </div>
+                <div className="modal__content__msg">
+                    {modalContent.msg}
+                </div>
+                <div className="modal__content__bottom">
+                    <button
+                        className="button button_default modal__content__button_ok"
+                        onClick={() => setModalActive(false)}>
+                        OK
+                    </button>
+                </div>
+            </Modal>
+            <Loader active={isLoading} />
+            <div className="profile___inner-wrapper">
+                <div className="profile__headline profile__headline_center">
+                    Изменить пароль
+                </div>
+                <fetcher.Form 
+                    method="PUT"
+                    className="profile___personal-settings__fuilds-container_password">
+                    <p className="profile_fuild-conteiner_passsword">
+                        <div className='profile__label profile__label_password'>
+                            Старый пароль
+                        </div>
+                        <div 
+                            className="profile__input_password"
+                        >
+                        <input 
+                            className='main-form__password-fuild__input'
+                            type={
                                 isHiddenOldnPassword?
-                                eyeOff
-                                : eyeOpen         
-                            } 
-                            onClick={() => setIsHiddenOldnPassword(prevState => !prevState)}
-                            alt="Hide the password"/>
-                    </div>
-                </p>
+                                'password'
+                                :'text'
+                            }
+                            name="old_password" 
+                            placeholder='Введите старый пароль'
+                            onChange={handleChange}
+                        />
+                            <img 
+                                className='eye'
+                                src={
+                                    isHiddenOldnPassword?
+                                    eyeOff
+                                    : eyeOpen         
+                                } 
+                                onClick={() => setIsHiddenOldnPassword(prevState => !prevState)}
+                                alt="Hide the password"/>
+                        </div>
+                    </p>
 
-                <p className="profile_fuild-conteiner_passsword">
-                    <div className='profile__label profile__label_password'>
-                        Новый пароль
-                    </div>
-                    <div 
-                        className="profile__input_password"
-                    >
-                    <input 
-                        className='main-form__password-fuild__input'
-                        type={
-                            isHiddenNewPassword?
-                            'password'
-                            :'text'
-                        }
-                        name="new_password" 
-                        placeholder='Введите новый пароль'
-                        onChange={handleChange}
-                    />
-                        <img 
-                            className='eye'
-                            src={
+                    <p className="profile_fuild-conteiner_passsword">
+                        <div className='profile__label profile__label_password'>
+                            Новый пароль
+                        </div>
+                        <div 
+                            className="profile__input_password"
+                        >
+                        <input 
+                            className='main-form__password-fuild__input'
+                            type={
                                 isHiddenNewPassword?
-                                eyeOff
-                                : eyeOpen         
-                            } 
-                            onClick={() => setIsHiddenNewPassword(prevState => !prevState)}
-                            alt="Hide the password"/>
-                    </div>
-                </p>
+                                'password'
+                                :'text'
+                            }
+                            name="new_password" 
+                            placeholder='Введите новый пароль'
+                            onChange={handleChange}
+                        />
+                            <img 
+                                className='eye'
+                                src={
+                                    isHiddenNewPassword?
+                                    eyeOff
+                                    : eyeOpen         
+                                } 
+                                onClick={() => setIsHiddenNewPassword(prevState => !prevState)}
+                                alt="Hide the password"/>
+                        </div>
+                    </p>
 
-                <p className="profile_fuild-conteiner_passsword">
-                    <div className='profile__label profile__label_password'>
-                        Повторите пароль
-                    </div>
-                    <div 
-                        className="profile__input_password"
-                    >
-                    <input 
-                        className='main-form__password-fuild__input'
-                        type={
-                            isHiddenRepeat?
-                            'password'
-                            :'text'
-                        }
-                        name="repeat" 
-                        placeholder='Повторите новый пароль'
-                        onChange={handleChange}
-                    />
-                        <img 
-                            className='eye'
-                            src={
+                    <p className="profile_fuild-conteiner_passsword">
+                        <div className='profile__label profile__label_password'>
+                            Повторите пароль
+                        </div>
+                        <div 
+                            className="profile__input_password"
+                        >
+                        <input 
+                            className='main-form__password-fuild__input'
+                            type={
                                 isHiddenRepeat?
-                                eyeOff
-                                : eyeOpen         
-                            } 
-                            onClick={() => setIsHiddenRepeat(prevState => !prevState)}
-                            alt="Hide the password"/>
-                    </div>
-                </p>
+                                'password'
+                                :'text'
+                            }
+                            name="repeat" 
+                            placeholder='Повторите новый пароль'
+                            onChange={handleChange}
+                        />
+                            <img 
+                                className='eye'
+                                src={
+                                    isHiddenRepeat?
+                                    eyeOff
+                                    : eyeOpen         
+                                } 
+                                onClick={() => setIsHiddenRepeat(prevState => !prevState)}
+                                alt="Hide the password"/>
+                        </div>
+                    </p>
 
-                {
-                    isActive ?
-                    <button 
-                        className="button button_default button_center"
-                        type="submit"
-                        name="intent"  
-                        value="change_password"
-                    >
-                        Изменить
-                    </button>
-                    : <button 
-                        className="button button_desable button_center"
-                        disabled
-                    >
-                        Изменить
-                    </button>
-                }
-            </Form>
-        </div>
+                    {
+                        isActive ?
+                        <button 
+                            className="button button_default button_center"
+                            type="submit"
+                            name="intent"  
+                            value="change_password"
+                        >
+                            Изменить
+                        </button>
+                        : <button 
+                            className="button button_desable button_center"
+                            disabled
+                        >
+                            Изменить
+                        </button>
+                    }
+                </fetcher.Form>
+            </div>
+        </>
+        
     )
 }
 
 
 function DeleteProfile(){
+    const fetcher = useFetcher()
+    const [isLoading, setloading] = useState(false);
+
+    const [modalActive, setModalActive] = useState(false);
+    const [modalContent, setModelContent] = useState(ServerErrorModal);
+
+    useEffect(()=>{
+        if(fetcher.state === 'submitting'){
+            setloading(true);
+        } else {
+            setloading(false);
+        }
+
+    }, [fetcher.state])
+
+    useEffect(()=>{
+        if(fetcher.data){
+            const { intent, msg } = fetcher.data;
+            if(msg === "incorrect password length"){
+                setModelContent(IncorrectPassLengthModal);
+                setModalActive(true)
+            }
+            if(msg === "Invalid password"){
+                setModelContent(InvalidPasswordModal);
+                setModalActive(true)
+            }
+            if(msg === "Passwords don't match"){
+                setModelContent(PassMatchErrorModal);
+                setModalActive(true)
+            }
+        }
+    }, [fetcher.data])
+
     const initialFormDataState = {
         password: "",
         repeat: "",
@@ -546,103 +659,124 @@ function DeleteProfile(){
     }
 
     return (
-        <div className="profile___inner-wrapper">
-            <div className="profile__headline profile__headline_center">
-                Удалить профиль
-            </div>
-            <Form
-                method="DELETE" 
-                className="profile___personal-settings__fuilds-container_password">
-                <p className="profile_fuild-conteiner_passsword">
-                    <div className='profile__label profile__label_password'>
-                        Пароль
-                    </div>
-                    <div 
-                        className="profile__input_password"
-                    >
-                    <input 
-                        className='main-form__password-fuild__input'
-                        type={
-                            isHiddenPassword?
-                            'password'
-                            :'text'
-                        }
-                        name="password" 
-                        placeholder='Введите пароль'
-                        onChange={handleChange}
-                    />
-                        <img 
-                            className='eye'
-                            src={
+        <>
+            <Modal 
+                active={modalActive}
+                setActive={setModalActive}
+            > 
+                <div className="modal__content__title">
+                    {modalContent.title}
+                </div>
+                <div className="modal__content__msg">
+                    {modalContent.msg}
+                </div>
+                <div className="modal__content__bottom">
+                    <button
+                        className="button button_default modal__content__button_ok"
+                        onClick={() => setModalActive(false)}>
+                        OK
+                    </button>
+                </div>
+            </Modal>
+            <Loader active={isLoading} />
+            <div className="profile___inner-wrapper">
+                <div className="profile__headline profile__headline_center">
+                    Удалить профиль
+                </div>
+                <fetcher.Form
+                    method="DELETE" 
+                    className="profile___personal-settings__fuilds-container_password">
+                    <p className="profile_fuild-conteiner_passsword">
+                        <div className='profile__label profile__label_password'>
+                            Пароль
+                        </div>
+                        <div 
+                            className="profile__input_password"
+                        >
+                        <input 
+                            className='main-form__password-fuild__input'
+                            type={
                                 isHiddenPassword?
-                                eyeOff
-                                : eyeOpen         
-                            } 
-                             onClick={() => setIsHiddenPassword(prevState => !prevState)}
-                            alt="Hide the password"/>
-                    </div>
-                </p>
+                                'password'
+                                :'text'
+                            }
+                            name="password" 
+                            placeholder='Введите пароль'
+                            onChange={handleChange}
+                        />
+                            <img 
+                                className='eye'
+                                src={
+                                    isHiddenPassword?
+                                    eyeOff
+                                    : eyeOpen         
+                                } 
+                                onClick={() => setIsHiddenPassword(prevState => !prevState)}
+                                alt="Hide the password"/>
+                        </div>
+                    </p>
 
-                <p className="profile_fuild-conteiner_passsword">
-                    <div className='profile__label profile__label_password'>
-                        Повторите пароль
-                    </div>
-                    <div 
-                        className="profile__input_password"
-                    >
-                    <input 
-                        className='main-form__password-fuild__input'
-                        type={
-                            isHiddenRepeat?
-                            'password'
-                            :'text'
-                        }
-                        name="repeat" 
-                        placeholder='Повторите пароль'
-                        onChange={handleChange}
-                    />
-                        <img 
-                            className='eye'
-                            src={
+                    <p className="profile_fuild-conteiner_passsword">
+                        <div className='profile__label profile__label_password'>
+                            Повторите пароль
+                        </div>
+                        <div 
+                            className="profile__input_password"
+                        >
+                        <input 
+                            className='main-form__password-fuild__input'
+                            type={
                                 isHiddenRepeat?
-                                eyeOff
-                                : eyeOpen         
-                            } 
-                            onClick={() => setIsHiddenRepeat(prevState => !prevState)}
-                            alt="Hide the password"/>
-                    </div>
-                </p>
-                <p className="profile__checkbox">
-                    <input 
-                        type="checkbox" 
-                        name="agreement" 
-                        value="AGREE"
-                        onChange={handleAgree}
-                    /> 
-                    <div className="profile__checkbox__text">
-                        Я принимаю, что все мои данные и информация о проектах будут безвозвратно удалены
-                    </div>
-                </p>
+                                'password'
+                                :'text'
+                            }
+                            name="repeat" 
+                            placeholder='Повторите пароль'
+                            onChange={handleChange}
+                        />
+                            <img 
+                                className='eye'
+                                src={
+                                    isHiddenRepeat?
+                                    eyeOff
+                                    : eyeOpen         
+                                } 
+                                onClick={() => setIsHiddenRepeat(prevState => !prevState)}
+                                alt="Hide the password"/>
+                        </div>
+                    </p>
+                    <p className="profile__checkbox">
+                        <input 
+                            type="checkbox" 
+                            name="agreement" 
+                            value="AGREE"
+                            onChange={handleAgree}
+                        /> 
+                        <div className="profile__checkbox__text">
+                            Я принимаю, что все мои данные и информация о проектах будут безвозвратно удалены
+                        </div>
+                    </p>
 
-                {
-                    isActive ?
-                        <button 
-                            className="button button_default button_center"
-                            type="submit"
-                            name="intent"  
-                            value="delete_profile"
+                    {
+                        isActive ?
+                            <button 
+                                className="button button_default button_center"
+                                type="submit"
+                                name="intent"  
+                                value="delete_profile"
+                            >
+                                Удалить
+                            </button>
+                            : <button 
+                            className="button button_desable button_center"
+                            disabled
                         >
                             Удалить
                         </button>
-                        : <button 
-                        className="button button_desable button_center"
-                        disabled
-                    >
-                        Удалить
-                    </button>
-                }
-            </Form>
-        </div>
+                    }
+                </fetcher.Form>
+            </div>
+        </>
     )
 }
 
@@ -691,7 +825,7 @@ export const sendProfileFormData = async ({params, request}) => {
                 }
             }
         )
-        return(response);
+        return response;
     }
     // Удалить аватар
     if (intent === "delete_avatar") {
@@ -733,7 +867,7 @@ export const sendProfileFormData = async ({params, request}) => {
     }
     // Изменить личные данные
     if (intent === "update_profile") {
-        if(PHONE_NUMBER_REGEXP.test(formData.get("phone_number"))){
+        if(formData.get("phone_number") === '' || PHONE_NUMBER_REGEXP.test(formData.get("phone_number"))){
             const response = await updateProfile(formData).then(
                 (response) => {
                     switch (response.status) {

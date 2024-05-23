@@ -1,6 +1,6 @@
-import { Link, useNavigate} from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
+import { Link, useNavigate} from 'react-router-dom';
+import { useDispatch } from "react-redux";
 import { login } from "../../api/userApi"
 import eyeOpen from "../../theme/img/forms/eye-open.svg"
 import eyeOff from "../../theme/img/forms/eye-off.svg"
@@ -9,7 +9,7 @@ import line from "../../theme/img/forms/line-login.svg"
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
 
-function LogIn() {
+export function LogIn() {
     return (
         <div className='form-container'>
             <FormLogin/>
@@ -168,7 +168,8 @@ function FormLogin() {
     }
 
     return (
-            <form className='main-form wrapper_form'>
+        <div className='form-container'>
+            <form className='main-form'>
                 <div className='main-form__headline'>
                     Войти
                         <img 
@@ -265,8 +266,6 @@ function FormLogin() {
                     />
                 </div>
             </form>
+        </div>
     )
 }
-
-
-export { LogIn };

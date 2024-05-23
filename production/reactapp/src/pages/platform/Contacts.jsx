@@ -6,18 +6,18 @@ const subtitle1 = "Менеджер по работе с клиентами:";
 const subtitle2 = "По вопросам рекламы и сотрудничества:";
 const contact1 = {
     name: "— Мачян Мария Аветиковна",
-    data: "+7 (000) 000-00-00",
+    data: "+7 (988) 588-43-27",
 };
 
 const contact2 = {
     name: "— Ковтунов Иван Александрович",
-    data: "+7 (000) 000-00-00",
+    data: "+7 (951) 491-85-37",
 };
 
 const title2 = "E-mail"
 const contact3 = {
     name: "— Команда MedMindes",
-    data: "info@madminds.ru",
+    data: "medmindes@mail.ru",
 };
 
 const title3 = "Партнёры"
@@ -31,19 +31,23 @@ const contact4 = {
 //     data: "cvisionlab.com",
 // }; 
 
-function Contacts() {
+export function Contacts() {
     return (
         <div className="contacts-container wrapper">
             <div className="contacts-container__main-title">
                 Контакты
             </div>
             <div className="contacts__buttons-wrapper">
-            <Link to='/platform/feedback' className='button button_default'>
-                Обратная связь
-            </Link>
-            <Link to='/platform/presentation' className='button button_lite'>
-                Заказать презентацию
-            </Link>
+                <div className='contacts__buttons__single-button'>
+                    <Link to='/platform/feedback' className='button button_default'>
+                        Обратная связь
+                    </Link>
+                </div>
+                <div className='contacts__buttons__single-button'>
+                    <Link to='/platform/presentation' className='button button_lite'>
+                        Заказать презентацию
+                    </Link>
+                </div>
             </div>
             <div className="contacts__blok-wrapper">
                 <div className="contacts__blok-wrapper__title">
@@ -101,5 +105,3 @@ function ContactBlok(props) {
         </>
     )
 }
-
-export { Contacts };

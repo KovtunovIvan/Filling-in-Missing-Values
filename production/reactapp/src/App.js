@@ -1,8 +1,4 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useDispatch, useSelector} from "react-redux";
-import { useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-
 import './theme/styles/App.css';
 import './theme/styles/guide.css';
 import './theme/styles/projects-list.css';
@@ -15,17 +11,13 @@ import './theme/styles/profile.css';
 import './theme/styles/footer.css';
 import './theme/styles/success-main-submit.css';
 import './theme/styles/modal.css';
-
-import { userCheck } from "./api/userApi"
-import { setUser } from "./redux/userData";
-import { LocalStorageTools } from "./localStorage";
-
-import { PrivateRoute,userLoader } from "./routes/PrivateRoute";
+import './theme/styles/loader.css';
+import './theme/styles/error404.css';
+import './theme/styles/rejected.css';
+import { PrivateRoute } from "./routes/PrivateRoute";
 import { GuestRoute } from "./routes/GuestRoute";
-
 import { MainLayout } from './components/main/MainLayout';
 import { AppLayout} from './components/app/AppLayout';
-
 import { Root } from './pages/root/Root';
 import { Contacts } from './pages/platform/Contacts';
 import { Guide } from './pages/platform/Guide';
@@ -35,18 +27,14 @@ import { LogIn } from './pages/u/LogIn';
 import { Registration } from './pages/u/Registration';
 import { Demo } from './pages/platform/Demo';
 import { CreateProject } from './pages/app/CreateNewProject';
-import { AllProjects, projectsLoader } from "./pages/app/AllProjects";
+import { AllProjects } from "./pages/app/AllProjects";
 import { Settings } from "./pages/app/Settings";
 import { PasswordResore } from "./pages/u/PasswordRestore";
-import { Profile, Profileloader, sendProfileFormData } from "./pages/app/Profile";
+import { Profile, sendProfileFormData } from "./pages/app/Profile";
 import { OneProjectLoader, Project } from "./pages/app/Project";
-import { SuccessfulSubmitPage } from "./pages/platform/SuccessfulSubmitPage"
-import ErrorPage from './components/ErrorPage';
 import { sendFormData } from "./components/app/ProcessingSettings";
-import store from './redux/store';
-
-
-import {giudeChildrenRoutes} from "./pages/platform/Guide"
+import { giudeChildrenRoutes } from "./pages/platform/Guide"
+import { NotFoundPage } from "./pages/optional/error404";
 
 
 function App() {
@@ -54,11 +42,11 @@ function App() {
     {
       path: "/",
       element: <Root/>,
+      errorElement: <NotFoundPage/>
     },
     {
       path:"/platform",
       element: <MainLayout/>,
-      errorElement: <ErrorPage/>,
       children: [
         {
           index:true,
@@ -84,14 +72,6 @@ function App() {
           path:"demo",
           element:<Demo/>,
         },
-        {
-          path:"feedback-success",
-          element:<SuccessfulSubmitPage page={"feedback"}/>,
-        },
-        {
-          path:"presentation-success",
-          element:<SuccessfulSubmitPage page={"presentation"}/>,
-        },
       ]
     },
     {
@@ -101,7 +81,6 @@ function App() {
         <MainLayout/>
       </GuestRoute>
       ),
-      errorElement: <ErrorPage/>,
       children: [
         {
           path:"login",
@@ -119,13 +98,11 @@ function App() {
     },
     {
       path:"/app",
-      errorElement: <ErrorPage/>,
       element:(
         <PrivateRoute>
           <AppLayout/>
         </PrivateRoute>
       ),
-      loader: userLoader,
       children: [
         {
           index:true,
@@ -135,7 +112,6 @@ function App() {
         {
           path:"projects",
           element:<AllProjects/>,
-          loader: projectsLoader,
         },
         {
           path:"projects/:id",
@@ -157,6 +133,7 @@ function App() {
   ])
 
   /*
+  // react router old version
   const router2 = createBrowserRouter(
     createRoutesFromElements(
         <Route path='/' element={<Outlet/>} >

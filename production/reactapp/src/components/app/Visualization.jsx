@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { getNormalDistribution, getCorrelationMatrix, getBoxPlot} from "../../api/projectApi"
 import { useDispatch, useSelector } from 'react-redux';
+import { getNormalDistribution, getCorrelationMatrix, getBoxPlot} from "../../api/projectApi"
 import { setColumn, setImg, setVisualizationType } from '../../redux/visualizationData';
 import matrixIcon from "../../theme/img/visualization/matrix-icon.svg"
 import nornDistibutionIcon from "../../theme/img/visualization/norm-distribution-icon.svg"
@@ -65,7 +65,7 @@ export const getPicture = column_name => {
     }
 }
 
-function Visualization(props) {
+export function Visualization() {
     const [activeIndex, setActiveIndex] = useState(0);
     const hendleSelector = (e) => {
         const id = e.target.id;
@@ -78,28 +78,53 @@ function Visualization(props) {
         }
     }
 
+    const actualGraficType = graficTypes[useSelector((state) => state.visualizationData.id)];
     const imgSrc = useSelector((state) => state.visualizationData.img)
     const disabled = imgSrc ? false : true;
     const activeColumn = useSelector((state) => state.visualizationData.column_name);
     const activeType = useSelector((state) => state.visualizationData.id);
     const imgFileName = disabled ? null : `${activeColumn}_${graficTypes[activeType].label}`;
-    const buttonStyle = disabled ? "button button_disable" : "button button_default";
-    const downloadButton = 
-        disabled ?                
-            <button 
-                className={buttonStyle}
-                disabled
-            >
-                Скачать
-            </button>
-            :<a 
-                download={imgFileName}
-                className={buttonStyle}
-                href={imgSrc}
-            >
-                Скачать
-            </a>
-            
+    const buttonStyle = disabled ? "download_vis_button button button_disable" : "download_vis_button button button_default";
+    const downloadButton_bg = 
+        disabled ?      
+            <div className='download_vis_button_container big_screen'>
+                <button 
+                    className={`${buttonStyle}`}
+                    disabled 
+                >
+                    Скачать
+                </button>
+            </div>          
+
+            :<div className='download_vis_button_container big_screen'>
+                <a 
+                    download={imgFileName}
+                    className={`${buttonStyle}`}
+                    href={imgSrc}
+                >
+                    Скачать
+                </a>
+            </div> 
+
+        const downloadButton_sm = 
+        disabled ? 
+            <div className='download_vis_button_container small_screen'>              
+                <button 
+                    className={`${buttonStyle}`}
+                    disabled 
+                >
+                    Скачать
+                </button>
+            </div> 
+            :<div className='download_vis_button_container small_screen'>
+                <a 
+                    download={imgFileName}
+                    className={`${buttonStyle}`}
+                    href={imgSrc}
+                >
+                    Скачать
+                </a>
+            </div>
     return (
         <div className="project-config-inner-wrapper project-config-inner-wrapper_vis">
             <div className="project-config__title">
@@ -137,23 +162,23 @@ function Visualization(props) {
                             : <GraficSettings />
                     }
 
-                    { downloadButton }
+                    { downloadButton_bg }
                 </div>
                 <div className='project-config__content_vis-result'>
-                        {
-                            /*
-                            
-                            <div className='project-config__content_vis-result__title'>
-                                {graficTypes[useSelector((state) => state.visualizationData.id)].title}
-                            </div>
-
-                            */
-                        }
-                    <div className='project-config__content_vis-result__img-container'>
-                        <img id="image-g" alt="Выберите график" height={400} src={imgSrc}/>
+                    <div className='project-config__content_vis-result__title'>
+                        { actualGraficType ? 
+                            <span/> // discription or title if necessary
+                            : "Выберете график"}
                     </div>
+                    <div className='project-config__content_vis-result__img-container'>
+                        {
+                            actualGraficType ?
+                                <img id="image-g" alt="Выберите график" className='project-config__content_vis-result__img-container_img' src={imgSrc}/>
+                                : <span/>
+                        }
+                    </div>
+                    { downloadButton_sm }
                 </div>
-
             </div>
         </div>
     )
@@ -161,8 +186,7 @@ function Visualization(props) {
 }
 
 
-function GraficTypeSelector(props) {
-
+function GraficTypeSelector() {
     const list = graficTypes.map((x) => {
         return (
             <GraphButton
@@ -306,6 +330,3 @@ function SelectColumn(props) {
         </div>
     )
 }
-
-
-export { Visualization }

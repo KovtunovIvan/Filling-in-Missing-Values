@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Form, Link, redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { restorePassword } from '../../api/userApi';
 
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
 const textInfo = "На указанную почту будет отправлено письмо со ссылкой для изменения пароля."
 const textInstruction = "Инструкции по восстановлению пароля отправлены на указанную почту."
-function PasswordResore(props) {
+
+export function PasswordResore(props) {
 
     const initialRestoreState = {
         loading: false,
@@ -94,32 +95,26 @@ function PasswordResore(props) {
             message: "",
             success: false,
         });
-
         restorePassword(formData.email).then(
-            () => {
-                setRestoreState( {
-                    loading: false,
-                    message: "",
-                    success: true,
-                })
-
-                // setRestoreState( {
-                //     loading: false,
-                //     message: "Пользователя с указанным email не существует.",
-                //     success: false,
-                // })
+            (response) => {
+                if(response.data.error){
+                    setRestoreState( {
+                        loading: false,
+                        message: response.data.error,
+                        success: false,
+                    })
+                } else {
+                    setRestoreState( {
+                        loading: false,
+                        message: "",
+                        success: true,
+                    })
+                }
             },
             (error) => {
-                const resMessage =
-                    (error.response &&
-                    error.response.data &&
-                    error.response.data.message) ||
-                    error.message ||
-                    error.toString();
-
                 setRestoreState( {
                     loading: false,
-                    message: "Пользователя с указанным email не существует.",
+                    message: "Неизвестная ошибка. Попробуйте снова через 1-2 минуты.",
                     success: false,
                 })
             }
@@ -227,5 +222,3 @@ function PasswordResore(props) {
         </div>
     )
 }
-
-export { PasswordResore };

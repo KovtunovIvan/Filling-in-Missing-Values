@@ -1,4 +1,4 @@
-function Settings() {
+export function Settings() {
     return (
         <div className="ui-settings_wrapper">
             <div className="ui-settings__content">
@@ -7,6 +7,3 @@ function Settings() {
         </div>
     )
 }
-
-
-export { Settings }

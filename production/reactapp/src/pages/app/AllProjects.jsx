@@ -1,41 +1,33 @@
-import { redirect, useLoaderData, useNavigation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ProjectList } from "../../components/app/ProjectList"
-import { getAllProjects } from "../../api/projectApi"
-import { LoadingPage } from "./LoadingPage";
+import { fetchProjectList } from "../../redux/projectListData";
+import { Loader } from "../../components/optional/Loader";
 
-export const projectsLoader = async ({request, params}) => {
-    const data = await getAllProjects();
-    const list = data.map((x) => {
-        const item = {
-            id: x.id, 
-            title: x.title,
-            status: "ready"
+
+export function AllProjects() {
+    const projectListStatus = useSelector((state) => state.projectListData.status)
+    const [isLoading, setloading] = useState(true);
+    const list = useSelector((state) => state.projectListData.list);
+
+    const dispatch = useDispatch();
+    useEffect(() => {
+        if(projectListStatus === 'idle' || projectListStatus === 'deleted'){
+            dispatch(fetchProjectList())
         }
-
-        return item
-    })
-    if(list.length === 0){
-        return redirect("/app")
-    }
-
-    return list;
-}
-
-
-function AllProjects() {
-    const list = useLoaderData();
-
-    const navigation = useNavigation();
-    if (navigation.state === "loading") {
-      return <LoadingPage/>;
-    }
-
+        if(projectListStatus === 'loading') {
+            setloading(true);
+        }
+        if(projectListStatus === 'succeeded') {
+            setloading(false);
+        }
+    }, [projectListStatus, dispatch, list])
+   
     return (
         <>
-            <ProjectList data={list}/>
+            {
+                isLoading ? <Loader active={isLoading}/> : <ProjectList data={list}/>
+            }
         </>
     )
 }
-
-
-export { AllProjects }

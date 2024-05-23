@@ -1,0 +1,35 @@
+.rejected-wrapper{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background: #EFF6FF;
+}
+.rejected-wrapper__header{
+  font-size: 2em;
+  font-weight: 600;
+  color: var(--main-headline-color);
+  height: 80px;
+}
+.rejected-wrapper__msg{
+  font-size: 1.5em;
+  font-weight: 600;
+  color: var(--main-headline-color);
+  padding: 15px 0;
+}
+.rejected-wrapper__link-back{
+  cursor: pointer;
+	outline: inherit;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  margin-right: 18px;
+  color: var(--main-headline-color);
+}
+.rejected-wrapper__link-main{
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--main-headline-color);
+}

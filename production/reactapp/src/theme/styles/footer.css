@@ -1,12 +1,16 @@
 .footer-wrapper{
   background-image: url("../img/main/back.png");
   padding: 10px 16px 10px 16px;
-  height: var(--footer-size);
+  height: fit-content;
+  width: 100%;
+  z-index: 50;
+  position: absolute;
 }
 
 .footer-nav {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 20px 0px 20px 0px;
@@ -19,11 +23,14 @@
 }
 
 .footer-contacts {
-  color: white;
+  padding-bottom: 10px;
 }
 
 .footer-buttons{
-  display: grid;
-  grid-template-columns: 175px 230px;
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
 }
+ .footer-buttons__single-button{
+  margin-right: 12px;
+  margin-top: 18px;
+ }

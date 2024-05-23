@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
+import {Form, redirect, useNavigate} from "react-router-dom"
 import { sendDataForProcessing } from "../../api/projectApi"
 import { SelectOption } from "./SelectOption";
-import {Form, redirect} from "react-router-dom"
 
 const fillMethods = [ 
     {
@@ -65,16 +65,21 @@ const scalingMathods = [
     },   
 ]
  
-export const sendFormData = async ({request}) => {
+export const sendFormData = async ({request, params}) => {
     let formData = await request.formData();
     const response = await sendDataForProcessing(formData);
-     return redirect("/app/projects");;
+     return redirect(`/app/projects/${params.id}`);
 } 
 
-function ProcessingSettings(props) {
+export function ProcessingSettings(props) {
     const {disabled} = props;
     const buttonStyle = disabled ? "button button_disable" : "button button_default";
     const id = useSelector((state) => state.projectData.id);
+
+    const navigate = useNavigate()
+    const handleResetProjectInfo = async () => {
+        navigate(0);
+    }
 
     return (
         <div className="project-config-inner-wrapper project-config-inner-wrapper_processing">
@@ -82,7 +87,7 @@ function ProcessingSettings(props) {
                 Обработка данных
             </div>
             <Form 
-                action="/app/projects/:id"
+                action={`/app/projects/${id}`}
                 method="post"
                 className="project-config__content_processing">
                 <div className="project-processing__content_form">
@@ -114,6 +119,7 @@ function ProcessingSettings(props) {
                             name="project_id"
                             value={id}
                             className={'project-config__right-button project-config__content_processing__button ' + buttonStyle}
+                            onClick={handleResetProjectInfo}
                         >
                             Отправить
                         </button>
@@ -122,6 +128,3 @@ function ProcessingSettings(props) {
         </div>
     )
 }
-
-
-export {ProcessingSettings}

@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { createNewProject } from "../../api/projectApi"
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { createNewProject } from "../../api/projectApi"
+import { Loader } from '../optional/Loader';
+import { resetProjectList } from '../../redux/projectListData';
 
 
 const infoContent = "Загрузите файл формата .CSV или .XLSX. размером не более 100Мб с Вашего устройства." 
 const acceptFiles = ".csv, .xlsx"
 
-function ProjectCreate() {
+export function ProjectCreate() {
     const initialCreateState = {
         loading: false,
         message: "",
@@ -19,17 +22,24 @@ function ProjectCreate() {
         setIsActive(true);
     }, [isFileSelected])
 
-    function handleUpload() {
+    const [isLoading, setloading] = useState(false);
+    
+    useEffect(()=> {
+        if(createState.loading){
+            setloading(true);
+        }
+    }, [createState.loading])
 
+    function handleUpload() {
         //!!!validation
         setIsFileSelected(true);
         if(isActive) {
             create();
         }
     }
-
+    
     const navigate = useNavigate();
-
+    const dispatch = useDispatch();
     function create() {
         setCreateState( {
             loading: true,
@@ -41,7 +51,8 @@ function ProjectCreate() {
             formData.append("file", selectedFile);
             createNewProject(formData).then(
                 () => { 
-                    navigate(`/app/projects/`);
+                    dispatch(resetProjectList());
+                    navigate('/app/projects/');
                 },
                 (error) => {
                     const resMessage =
@@ -60,10 +71,12 @@ function ProjectCreate() {
     }
 
     return (
-        <div className="project-create-inner-wrapper">
-            <div className="project-create__title">
-                Создать проект
-            </div>
+        <>
+            <Loader active={isLoading} />
+            <div className="project-create-inner-wrapper">
+                <div className="project-create__title">
+                    Создать проект
+                </div>
                 <div className="project-create__content__data__info">
                     {infoContent}
                 </div>
@@ -79,10 +92,9 @@ function ProjectCreate() {
                     <label for="input__file" class="button button_default">
                         <div>Загрузить файл</div>
                     </label>
+                </div>
             </div>
-        </div>
+        </>
+        
     )
 }
-
-
-export {ProjectCreate}

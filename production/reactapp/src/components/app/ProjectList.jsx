@@ -1,32 +1,17 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ProjectListItem } from "./ProjectListItem"
 
-const test = [
-    {
-        id: 1,
-        title: "project1.csv",
-        status: "ready"
-    },
-    {
-        id: 2,
-        title: "project2.csv",
-        status: "processing"
-    },
-    {
-        id: 3,
-        title: "project3.csv",
-        status: "OK"
-    },
-    {
-        id: 4,
-        title: "project4.csv",
-        status: "error"
-    },
-]
 
-
-
-function ProjectList(props) {
+export function ProjectList(props) {
     const {data} = props;
+    const navigate = useNavigate()
+    useEffect(()=>{
+            if(data.length === 0){
+                navigate("/app")
+            }
+        }, [data.length, navigate]
+    );
     const list = data.map(x => {
         return <ProjectListItem id={x.id} title={x.title} status={x.status}/>
     })
@@ -37,5 +22,3 @@ function ProjectList(props) {
         </div>
     )
 }
-
-export { ProjectList }
