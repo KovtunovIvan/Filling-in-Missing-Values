@@ -53,17 +53,17 @@ urlpatterns = [
     path("upload-avatar/", views.upload_avatar, name="upload_avatar"),
     path("delete-avatar/", views.delete_avatar, name="delete_avatar"),
     path(
-        "change-password/<str:old_password>/<str:new_password>/",
+        "change-password/",
         views.change_password,
         name="change_password",
     ),
     path(
-        "update-profile/<str:first_name>/<str:last_name>/<str:middle_name>/<str:phone_number>/",
+        "update-profile/",
         views.update_profile,
         name="update_profile",
     ),
     path(
-        "delete-profile/<str:password>/",
+        "delete-profile/",
         views.delete_user_profile,
         name="delete-user-profile",
     ),

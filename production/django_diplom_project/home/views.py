@@ -253,13 +253,12 @@ def download_processed_file(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     processed_file = project.processed_csv_file
 
-    # Открываем файл и возвращаем его как HttpResponse
     with open(processed_file.path, "rb") as file:
         file_content = file.read()
 
     response = HttpResponse(
         file_content,
-        content_type="text/csv",  # Укажите соответствующий MIME-тип для вашего файла
+        content_type="text/csv",
     )
     response["Content-Disposition"] = (
         f'attachment; filename="{project.processed_csv_file.name}"'
@@ -479,13 +478,20 @@ def delete_avatar(request):
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def change_password(request, old_password, new_password):
-    # Аутентифицируем пользователя
+def change_password(request):
+    old_password = request.data.get("old_password", None)
+    new_password = request.data.get("new_password", None)
+
+    if old_password is None or new_password is None:
+        return Response(
+            {"error": "Old and new passwords must be provided in the request body."},
+            status=400,
+        )
+
     user = request.user
     if not user.check_password(old_password):
         return Response({"error": "Invalid old password."}, status=400)
 
-    # Устанавливаем новый пароль и сохраняем пользователя
     user.set_password(new_password)
     user.save()
 
@@ -494,19 +500,31 @@ def change_password(request, old_password, new_password):
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def update_profile(request, first_name, last_name, middle_name, phone_number):
+def update_profile(request):
+    first_name = request.data.get('first_name', None)
+    last_name = request.data.get('last_name', None)
+    middle_name = request.data.get('middle_name', None)
+    phone_number = request.data.get('phone_number', None)
+
     user = request.user
-    user.first_name = first_name
-    user.last_name = last_name
-    user.middle_name = middle_name
-    user.phone_number = phone_number
+    if first_name is not None:
+        user.first_name = first_name
+    if last_name is not None:
+        user.last_name = last_name
+    if middle_name is not None:
+        user.middle_name = middle_name
+    if phone_number is not None:
+        user.phone_number = phone_number
     user.save()
+
     return Response({"message": "Profile updated successfully"}, status=200)
 
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
-def delete_user_profile(request, password):
+def delete_user_profile(request):
+    password = request.data.get('password', None)
+
     user = request.user
     if not user.check_password(password):
         return Response(
