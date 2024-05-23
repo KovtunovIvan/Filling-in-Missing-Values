@@ -591,3 +591,16 @@ def contact_view(request):
             )
     else:
         return JsonResponse({"status": "error", "message": "Используйте метод POST"})
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+
+    # Удаляем все визуализации, связанные с этим проектом
+    Visualization.objects.filter(project_id=project_id).delete()
+
+    project.delete()
+
+    return JsonResponse({"message": "Проект успешно удален"}, status=204)

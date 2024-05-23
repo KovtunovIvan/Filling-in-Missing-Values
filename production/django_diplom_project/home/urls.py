@@ -79,6 +79,9 @@ urlpatterns = [
         views.check_task_status,
         name="check_task_status",
     ),
+    path(
+        "delete-project/<int:project_id>/", views.delete_project, name="delete_project"
+    ),
 ]
 
 urlpatterns += static(
