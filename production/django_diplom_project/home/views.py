@@ -185,6 +185,22 @@ def get_project(request, project_id):
         else:
             features = None
         data["features"] = features
+
+        # Добавляем список признаков для исходного файла, если он загружен
+        original_data_path = None
+        if project.original_csv_file and project.original_csv_file.name:
+            original_data_path = project.original_csv_file.path
+        if original_data_path and os.path.exists(original_data_path):
+            # Если файл существует на сервере, читаем его и получаем список признаков
+            try:
+                df_original = pd.read_csv(original_data_path)
+                features_original = list(df_original.columns)
+            except FileNotFoundError:
+                features_original = None
+        else:
+            features_original = None
+        data["features_original"] = features_original
+
         return Response(data, status=status.HTTP_200_OK)
     except Project.DoesNotExist:
         return Response(
@@ -291,67 +307,137 @@ def check_task_status(request, project_id):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def correlation_matrix_view(request, project_id):
+def correlation_matrix_view(request, project_id, file_type):
     try:
         project = Project.objects.get(pk=project_id)
         user_id = request.user.id
 
-        visualization = Visualization.objects.filter(
-            project_id=project_id, visualization_type="Correlation Matrix"
-        ).first()
+        file_path = None
+        if file_type == "original":
+            file_path = project.original_csv_file.path
+        elif file_type == "processed":
+            file_path = project.processed_csv_file.path
 
-        if visualization:
-            with open(visualization.image_path, "rb") as f:
-                image_data = f.read()
-            return HttpResponse(image_data, content_type="image/png")
+        if file_path:
+            df = pd.read_csv(file_path)
 
-        file_path = project.processed_csv_file.path
-        df = pd.read_csv(file_path)
+            missing_values = df.isnull().sum()
+            missing_values_info = missing_values[missing_values > 0]
 
-        corr_matrix = df.corr()
+            missing_values_message = "Пропущенных значений нет."
+            if not missing_values_info.empty:
+                missing_values_message = f"Обнаружены пропущенные значения в следующих признаках: {', '.join(missing_values_info.index)}. Всего пропущено: {missing_values_info.sum()} значений."
 
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
-        plt.title("Correlation Matrix")
+            categorical_features = df.select_dtypes(include=["object"]).columns.tolist()
 
-        plot_dir = os.path.join(
-            "project_plots", "correlation_matrices", str(user_id), str(project_id)
-        )
-        os.makedirs(plot_dir, exist_ok=True)
+            categorical_features_message = "Категориальных признаков нет."
+            if categorical_features:
+                categorical_features_message = f"Следующие признаки являются категориальными: {', '.join(categorical_features)}."
 
-        image_name = f"{os.path.splitext(os.path.basename(file_path))[0]}.png"
-        image_path = os.path.join(plot_dir, image_name)
+            if not missing_values_info.empty or categorical_features:
+                return JsonResponse(
+                    {
+                        "message": f"{missing_values_message}\n{categorical_features_message}\nВизуализация невозможна, необходимо обработать данные."
+                    },
+                    status=400,
+                )
 
-        plt.savefig(image_path)
+            # Проверяем, существует ли уже визуализация с таким project_id и file_type
+            existing_visualization = Visualization.objects.filter(
+                project_id=project_id, file_type=file_type
+            ).first()
 
-        # Сохраняем информацию о визуализации в базе данных
-        Visualization.objects.create(
-            project_id=project_id,
-            visualization_type="Correlation Matrix",
-            image_path=image_path,
-        )
+            if existing_visualization:
+                # Если визуализация уже существует, просто вернем старый файл
+                with open(existing_visualization.image_path, "rb") as f:
+                    image_data = f.read()
+                return HttpResponse(image_data, content_type="image/png")
+            else:
+                # Если визуализация не существует, создаем новую
+                corr_matrix = df.corr()
 
-        plt.clf()
+                plt.figure(figsize=(10, 8))
+                sns.heatmap(
+                    corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5
+                )
+                plt.title("Корреляционная матрица")
 
-        with open(image_path, "rb") as f:
-            image_data = f.read()
-        return HttpResponse(image_data, content_type="image/png")
+                plot_dir = os.path.join(
+                    "project_plots",
+                    "correlation_matrices",
+                    str(user_id),
+                    str(project_id),
+                    file_type,
+                )
+
+                # Убеждаемся, что все директории созданы
+                os.makedirs(plot_dir, exist_ok=True)
+
+                base_name = str(os.path.splitext(os.path.basename(file_path))[0])
+                image_name = f"{base_name}_correlation_matrix.png"
+                image_path = os.path.join(plot_dir, image_name)
+
+                plt.savefig(image_path)
+
+                # Сохраняем информацию о визуализации в базе данных
+                Visualization.objects.create(
+                    project_id=project_id,
+                    visualization_type="Корреляционная матрица",
+                    image_path=image_path,
+                    file_type=file_type,
+                )
+
+                plt.clf()
+
+                with open(image_path, "rb") as f:
+                    image_data = f.read()
+                return HttpResponse(image_data, content_type="image/png")
+        else:
+            return HttpResponse("Файл не найден", status=404)
 
     except Project.DoesNotExist:
-
-        return HttpResponse("Project not found", status=404)
+        return HttpResponse("Проект не найден", status=404)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=500)
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def normal_distribution_view(request, project_id, feature_name):
+def normal_distribution_view(request, project_id, feature_name, file_type):
     try:
         project = Project.objects.get(pk=project_id)
         user_id = request.user.id
 
+        file_path = None
+        if file_type == "original":
+            file_path = project.original_csv_file.path
+        elif file_type == "processed":
+            file_path = project.processed_csv_file.path
+        else:
+            return JsonResponse({"message": "Некорректный тип файла"}, status=400)
+
+        df = pd.read_csv(file_path)
+
+        if df[feature_name].isnull().sum() > 0:
+            return JsonResponse(
+                {
+                    "message": f"Обнаружены пропущенные значения в признаке '{feature_name}'. Визуализация невозможна, необходимо обработать данные."
+                },
+                status=400,
+            )
+
+        if df[feature_name].dtype == "object":
+            return JsonResponse(
+                {
+                    "message": f"Признак '{feature_name}' является категориальным. Визуализация невозможна, необходимо обработать данные."
+                },
+                status=400,
+            )
+
         visualization = Visualization.objects.filter(
             project_id=project_id,
             feature_name=feature_name,
+            file_type=file_type,
             visualization_type="Normal Distribution",
         ).first()
 
@@ -360,19 +446,18 @@ def normal_distribution_view(request, project_id, feature_name):
                 image_data = f.read()
             return HttpResponse(image_data, content_type="image/png")
 
-        file_path = project.processed_csv_file.path
-        df = pd.read_csv(file_path)
-
-        feature_data = df[feature_name]
-
         plt.figure(figsize=(10, 8))
-        sns.histplot(feature_data, kde=True, color="blue", bins=20)
+        sns.histplot(df[feature_name], kde=True, color="blue", bins=20)
         plt.title(f"Normal Distribution of {feature_name}")
         plt.xlabel(feature_name)
         plt.ylabel("Frequency")
 
         plot_dir = os.path.join(
-            "project_plots", "normal_distributions", str(user_id), str(project_id)
+            "project_plots",
+            "normal_distributions",
+            str(user_id),
+            str(project_id),
+            file_type,
         )
         os.makedirs(plot_dir, exist_ok=True)
 
@@ -396,13 +481,14 @@ def normal_distribution_view(request, project_id, feature_name):
         return HttpResponse(image_data, content_type="image/png")
 
     except Project.DoesNotExist:
-
-        return HttpResponse("Project not found", status=404)
+        return HttpResponse("Проект не найден", status=404)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=500)
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def box_plot_view(request, project_id, feature_name):
+def box_plot_view(request, project_id, feature_name, file_type):
     try:
         project = Project.objects.get(pk=project_id)
         user_id = request.user.id
@@ -410,6 +496,7 @@ def box_plot_view(request, project_id, feature_name):
         visualization = Visualization.objects.filter(
             project_id=project_id,
             visualization_type="Box Plot",
+            file_type=file_type,
             feature_name=feature_name,
         ).first()
 
@@ -418,19 +505,44 @@ def box_plot_view(request, project_id, feature_name):
                 image_data = f.read()
             return HttpResponse(image_data, content_type="image/png")
 
-        file_path = project.processed_csv_file.path
+        file_path = None
+        if file_type == "original":
+            file_path = project.original_csv_file.path
+        elif file_type == "processed":
+            file_path = project.processed_csv_file.path
+
+        if not file_path:
+            return HttpResponse("File not found", status=404)
+
         df = pd.read_csv(file_path)
+
+        # Проверка наличия пропущенных значений и категориального признака для конкретного столбца
+        if df[feature_name].isnull().any():
+            return JsonResponse(
+                {
+                    "message": f"Обнаружены пропущенные значения в признаке {feature_name}. Визуализация невозможна, необходимо обработать данные."
+                },
+                status=400,
+            )
+
+        if df[feature_name].dtype == "object":
+            return JsonResponse(
+                {
+                    "message": f"Признак {feature_name} является категориальным. Визуализация невозможна."
+                },
+                status=400,
+            )
 
         plt.figure(figsize=(10, 8))
         sns.boxplot(x=feature_name, data=df)
         plt.title(f"Box Plot for {feature_name}")
 
         plot_dir = os.path.join(
-            "project_plots", "box_plots", str(user_id), str(project_id)
+            "project_plots", "box_plots", str(user_id), str(project_id), file_type
         )
         os.makedirs(plot_dir, exist_ok=True)
 
-        image_name = f"{os.path.splitext(os.path.basename(file_path))[0]}_{feature_name}_box_plot.png"
+        image_name = f"{feature_name}_box_plot.png"
         image_path = os.path.join(plot_dir, image_name)
 
         plt.savefig(image_path)
@@ -438,6 +550,7 @@ def box_plot_view(request, project_id, feature_name):
         Visualization.objects.create(
             project_id=project_id,
             visualization_type="Box Plot",
+            file_type=file_type,
             feature_name=feature_name,
             image_path=image_path,
         )
@@ -501,10 +614,10 @@ def change_password(request):
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
-    first_name = request.data.get('first_name', None)
-    last_name = request.data.get('last_name', None)
-    middle_name = request.data.get('middle_name', None)
-    phone_number = request.data.get('phone_number', None)
+    first_name = request.data.get("first_name", None)
+    last_name = request.data.get("last_name", None)
+    middle_name = request.data.get("middle_name", None)
+    phone_number = request.data.get("phone_number", None)
 
     user = request.user
     if first_name is not None:
@@ -523,7 +636,7 @@ def update_profile(request):
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_user_profile(request):
-    password = request.data.get('password', None)
+    password = request.data.get("password", None)
 
     user = request.user
     if not user.check_password(password):

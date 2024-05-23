@@ -33,20 +33,18 @@ urlpatterns = [
         name="process-data",
     ),
     path("upload-file/", views.upload_file, name="upload-file"),
-    # path('original-csv-file/<int:project_id>/', views.download_original_csv_file, name='original-csv-file-download'),
-    # path('processed-csv-file/<int:project_id>/', views.download_processed_csv_file, name='processed-csv-file-download'),
     path(
-        "correlation-matrix/<int:project_id>/",
+        "correlation-matrix/<int:project_id>/<str:file_type>/",
         views.correlation_matrix_view,
         name="correlation-matrix",
     ),
     path(
-        "normal-distribution/<int:project_id>/<str:feature_name>/",
+        "normal-distribution/<int:project_id>/<str:feature_name>/<str:file_type>/",
         views.normal_distribution_view,
         name="normal_distribution",
     ),
     path(
-        "box-plot/<int:project_id>/<str:feature_name>/",
+        "box-plot/<int:project_id>/<str:feature_name>/<str:file_type>/",
         views.box_plot_view,
         name="box_plot_view",
     ),

@@ -187,6 +187,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ORIGINAL_CSV_FILES_DIR = "original_csv_files/"
 PROCESSED_CSV_FILES_DIR = "processed_csv_files/"
 AVATARS_DIR = "avatars/"
+PROJECT_PLOTS_DIR = "project_plots/"
 
 # Настройки SMTP сервера для отправки электронной почты
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
