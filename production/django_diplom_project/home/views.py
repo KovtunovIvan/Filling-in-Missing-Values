@@ -171,35 +171,74 @@ def get_project(request, project_id):
             if project.processed_csv_file
             else None
         )
+
+        def detect_delimiter(filepath):
+            with open(filepath, "r") as file:
+                first_line = file.readline()
+                if ";" in first_line:
+                    return ";"
+                elif "," in first_line:
+                    return ","
+                else:
+                    return ","
+
         # Проверяем наличие файла на сервере и путь к файлу в базе данных
         processed_data_path = None
         if project.processed_csv_file and project.processed_csv_file.name:
             processed_data_path = project.processed_csv_file.path
+
         if processed_data_path and os.path.exists(processed_data_path):
             # Если файл существует на сервере, читаем его и получаем список признаков
             try:
-                df = pd.read_csv(processed_data_path)
+                delimiter = detect_delimiter(processed_data_path)
+                df = pd.read_csv(processed_data_path, delimiter=delimiter)
                 features = list(df.columns)
             except FileNotFoundError:
                 features = None
         else:
             features = None
-        data["features"] = features
 
         # Добавляем список признаков для исходного файла, если он загружен
         original_data_path = None
+        recommended_methods = None
+        original_num_rows = None
+        has_missing_values = None
+
         if project.original_csv_file and project.original_csv_file.name:
             original_data_path = project.original_csv_file.path
+
         if original_data_path and os.path.exists(original_data_path):
             # Если файл существует на сервере, читаем его и получаем список признаков
             try:
-                df_original = pd.read_csv(original_data_path)
+                delimiter = detect_delimiter(original_data_path)
+                df_original = pd.read_csv(original_data_path, delimiter=delimiter)
                 features_original = list(df_original.columns)
+
+                features_original = list(df_original.columns)
+                original_num_rows = df_original.shape[0]
+                has_missing_values = df_original.isnull().values.any()
+
+                if original_num_rows <= 2000:
+                    recommended_methods = [
+                        "DecisionTree",
+                        "RandomForest",
+                        "XGBRegressor",
+                        "CatBoostRegressor",
+                    ]
+                elif 2000 < original_num_rows <= 7000:
+                    recommended_methods = ["CatBoostRegressor", "SVM"]
+                else:
+                    recommended_methods = ["RandomForest"]
             except FileNotFoundError:
                 features_original = None
         else:
             features_original = None
+
+        data["features"] = features
         data["features_original"] = features_original
+        data["original_num_rows"] = original_num_rows
+        data["recommended_methods"] = recommended_methods
+        data["has_missing_values"] = has_missing_values
 
         return Response(data, status=status.HTTP_200_OK)
     except Project.DoesNotExist:
@@ -737,4 +776,3 @@ def delete_project(request, project_id):
     project.delete()
 
     return JsonResponse({"message": "Проект успешно удален"}, status=204)
-
