@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "rest_auth",  # авторизации через rest
     "corsheaders",  # cors для парса путей и подключения фронта и бэка
     "home",
+    "django_extensions",
+    "sslserver",
 ]
 
 MIDDLEWARE = [
@@ -203,3 +205,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
