@@ -277,7 +277,7 @@ def download_processed_file(request, project_id):
         content_type="text/csv",
     )
     response["Content-Disposition"] = (
-        f'attachment; filename="{project.processed_csv_file.name}"'
+        f'attachment; filename="{os.path.basename(project.processed_csv_file.name)}"'
     )
 
     return response
@@ -737,3 +737,4 @@ def delete_project(request, project_id):
     project.delete()
 
     return JsonResponse({"message": "Проект успешно удален"}, status=204)
+
