@@ -276,6 +276,7 @@ function FormFeedback() {
             />
             :
             <Form
+                id="fb"
                 method='POST' 
                 className='main-form'
             >
@@ -382,7 +383,7 @@ function FormFeedback() {
                             type="text" 
                             name="email" 
                             placeholder='Введите email'
-                            maxLength={200}
+                            maxLength={1000}
                             value={formData.email} 
                             onBlur={handleBlur}
                             onChange={handleChange} 
@@ -434,13 +435,15 @@ function FormFeedback() {
                                     'main-form__input main-form__input_message'
                                     :'main-form__input main-form__input_message main-form__input_error'}
                     >
-                        <input 
+                        <textarea 
                             className='main-form__input__text main-form__input__text_message'
                             type="text" 
                             name="feedback" 
+                            form="fb"
                             contentEditable="true"
                             placeholder='Напишите отзыв или вопрос'
-                            maxLength={200}
+                            maxLength={500}
+                            rows={11}
                             value={formData.feedback} 
                             onBlur={handleBlur}
                             onChange={handleChange} 

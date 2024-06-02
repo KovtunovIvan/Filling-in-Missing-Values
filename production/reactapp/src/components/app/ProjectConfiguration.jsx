@@ -1,5 +1,7 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getFileByUrl } from "../../api/projectApi"
+import { setOriginalFile, setProcessedFile } from "../../redux/projectData";
+import { resetVisualisation } from "../../redux/visualizationData";
 
 export function ProjectConfig(props) {
     const {isProcessed, getter, setter} = props;
@@ -30,14 +32,26 @@ export function ProjectConfig(props) {
         }
     }
     
-    const switchState = getSwitchState();
+    
+    const dispatch = useDispatch();
     const handleChangeActive = (e) => {
-        setter(Number(e.target.id))
+        const index = Number(e.target.id);
+        console.log(index)
+        setter(index);
+        if(index === 1){
+            dispatch(setProcessedFile());
+            dispatch(resetVisualisation());
+        } 
+        if(index === 0) {
+            dispatch(setOriginalFile());
+            dispatch(resetVisualisation());
+        } 
     }
 
     const getActiveFile = () => {
         getter() === 1 ? getFileByUrl(fileUrlResult) : getFileByUrl(fileUrlSource);
     }
+    const switchState = getSwitchState();
 
     const DefaultSource = (
         <button 

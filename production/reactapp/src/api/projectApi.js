@@ -1,6 +1,4 @@
-import { LocalStorageTools } from "../localStorage";
 import authHeader  from "./headers";
-import { setUser } from "../redux/userData";
 import { instance } from "./requests";
 
 
@@ -47,27 +45,27 @@ export const getFileByUrl = async (url) => {
   window.open(path);
 }
 
-export const getNormalDistribution = (id, columnName) => {
+export const getNormalDistribution = (id, columnName, file_type) => {
   const auth = authHeader();
-  const path = `normal-distribution/${id}/${columnName}/`;
+  const path = `normal-distribution/${id}/${columnName}/${file_type}/`;
   return instance.get(path, {
     headers: auth,
     responseType: "arraybuffer"
   });
 }
 
-export const getCorrelationMatrix = (id) => {
+export const getCorrelationMatrix = (id, file_type) => {
   const auth = authHeader();
-  const path = `correlation-matrix/${id}/`;
+  const path = `correlation-matrix/${id}/${file_type}/`;
   return instance.get(path, {
     headers: auth,
     responseType: "arraybuffer"
   });
 }
 
-export const getBoxPlot = (id, columnName) => {
+export const getBoxPlot = (id, columnName, file_type) => {
   const auth = authHeader();
-  const path = `box-plot/${id}/${columnName}/`;
+  const path = `box-plot/${id}/${columnName}/${file_type}/`;
   return instance.get(path, {
     headers: auth,
     responseType: "arraybuffer"

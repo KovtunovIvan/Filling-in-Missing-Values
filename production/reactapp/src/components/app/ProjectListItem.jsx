@@ -9,6 +9,7 @@ import { resetProject } from "../../redux/projectData";
 import { useRef, useState } from "react"
 import { useClickOutside } from "../../hooks/useClickOutside"
 import { deleteProject } from "../../redux/projectListData"
+import { resetVisualisation } from "../../redux/visualizationData"
 
 
 export function ProjectListItem(props) {
@@ -56,6 +57,7 @@ export function ProjectListItem(props) {
     const handleGoToProject = (e) => {
         if(e.target.id !== "option-box" && e.target.id !== "delete"){
             dispatch(resetProject())
+            dispatch(resetVisualisation());
             navigate(`/app/projects/${id}`);
         }
     }

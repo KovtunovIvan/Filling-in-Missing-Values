@@ -303,6 +303,7 @@ function FormPresentation() {
                 />
                 :
                 <Form
+                    id="presentation"
                     method='POST'
                     className='main-form'>
                     <div className='main-form__headline'>
@@ -464,13 +465,14 @@ function FormPresentation() {
                         <div 
                             className='main-form__input main-form__input_message'
                         >
-                            <input 
+                            <textarea 
                                 className='main-form__input__text main-form__input__text_message'
                                 type="text" 
+                                form="presentation"
                                 name="details" 
                                 contenteditable="true"
                                 placeholder='Напишите отзыв или вопрос'
-                                maxlength={200}
+                                maxlength={1000}
                                 value={formData.details} 
                                 onBlur={handleBlur}
                                 onChange={handleChange} 

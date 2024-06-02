@@ -107,9 +107,14 @@
 }
 
 .main-form__input__text_message {
-  max-width: 100%;
+  width: 100%;
 }
-
+textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  
+}
 .main-form__input_message {
   height: 230px;
 }

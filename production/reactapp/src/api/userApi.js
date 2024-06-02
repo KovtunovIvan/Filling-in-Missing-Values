@@ -83,9 +83,10 @@ export const changePassword = async (formData) => {
 
 export const deleteProfile = async (formData) => {
   const auth = authHeader();
-  const path = `delete-profile/`;
-  const response = await instance.delete(path, formData, {
+  const path = "delete-profile/";
+  const response = await instance.delete(path, {
     headers: auth,
+    data: formData,
   });
   return response;
 }

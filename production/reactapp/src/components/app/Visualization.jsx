@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getNormalDistribution, getCorrelationMatrix, getBoxPlot} from "../../api/projectApi"
-import { setColumn, setImg, setVisualizationType } from '../../redux/visualizationData';
+import { fetchVisualization, setVisualizationType } from '../../redux/visualizationData';
 import matrixIcon from "../../theme/img/visualization/matrix-icon.svg"
 import nornDistibutionIcon from "../../theme/img/visualization/norm-distribution-icon.svg"
 import boxBlotIcon from "../../theme/img/visualization/box-plot-icon.svg"
@@ -29,42 +28,6 @@ const graficTypes = [
 ]
 
 
-export const getPicture = column_name => {
-    return (dispatch, getState) => {
-        const vis_state = getState().visualizationData;
-        const pro_state = getState().projectData;
-        const type_id = vis_state.id;
-        const project_id = pro_state.id;
-
-        dispatch(setColumn(column_name));
-
-        const setPng = (res) => {
-            const base64 = btoa(
-                new Uint8Array(res.data).reduce(
-                  (data, byte) => data + String.fromCharCode(byte),
-                  ''
-                )
-              )
-            dispatch(setImg(`data:image/png;charset=utf-8;base64,${base64}`))
-            console.log(vis_state)
-        }
-
-        switch (type_id) {
-            case "0":
-                getCorrelationMatrix(project_id).then((res) => { setPng(res) });
-                break;
-            case "1":
-                getNormalDistribution(project_id, column_name).then((res) => { setPng(res) });
-                break;
-            case "2":
-                getBoxPlot(project_id, column_name).then((res) => { setPng(res) });
-                break;
-            default:
-                return;
-        }
-    }
-}
-
 export function Visualization() {
     const [activeIndex, setActiveIndex] = useState(0);
     const hendleSelector = (e) => {
@@ -80,6 +43,11 @@ export function Visualization() {
 
     const actualGraficType = graficTypes[useSelector((state) => state.visualizationData.id)];
     const imgSrc = useSelector((state) => state.visualizationData.img)
+    const original_num_rows = useSelector((state) => state.projectData.original_num_rows);
+    const recommended_methods = useSelector((state) => state.projectData.recommended_methods);
+    const active_file_type = useSelector((state) => state.projectData.active_file_type);
+    const has_missing_values = useSelector((state) => state.projectData.has_missing_values);
+    const message = useSelector((state) => state.visualizationData.message);
     const disabled = imgSrc ? false : true;
     const activeColumn = useSelector((state) => state.visualizationData.column_name);
     const activeType = useSelector((state) => state.visualizationData.id);
@@ -127,11 +95,28 @@ export function Visualization() {
             </div>
     return (
         <div className="project-config-inner-wrapper project-config-inner-wrapper_vis">
-            <div className="project-config__title">
-                Визуализация
-            </div>
             <div className="project-config__content project-config__content_vis">
                 <div className='project-config__content__vis-options'>
+                    {active_file_type === "original" && 
+                        <>
+                            <div className="project-config__title project-config__title_analysis">
+                                Анализ
+                            </div>
+                            <div className="project-config__optional">
+                                Количество строк: <span className="project-config__optional__value">{original_num_rows}</span>
+                            </div>
+                            <div className="project-config__optional">
+                                Наличие пропусков:  <span className="project-config__optional__value">{has_missing_values ? "да" : "нет"}</span>
+                            </div>
+                            <div className="project-config__optional">
+                                Рекомендованные методы: <span className="project-config__optional__value">{recommended_methods ? recommended_methods.join(", ") : "нет"}</span>
+                            </div>
+                        </>
+                    }
+                
+                    <div className="project-config__title">
+                        Визуализация
+                    </div>
                     <div className="project-config__content__navigation">
                         <button 
                             id="0"
@@ -161,22 +146,31 @@ export function Visualization() {
                             <GraficTypeSelector />
                             : <GraficSettings />
                     }
-
+                    
                     { downloadButton_bg }
                 </div>
                 <div className='project-config__content_vis-result'>
-                    <div className='project-config__content_vis-result__title'>
-                        { actualGraficType ? 
-                            <span/> // discription or title if necessary
-                            : "Выберете график"}
-                    </div>
-                    <div className='project-config__content_vis-result__img-container'>
-                        {
-                            actualGraficType ?
-                                <img id="image-g" alt="Выберите график" className='project-config__content_vis-result__img-container_img' src={imgSrc}/>
-                                : <span/>
-                        }
-                    </div>
+                    {
+                        message ?
+                            <div className='project-config__content_vis-result__title'>
+                               {message}
+                            </div>
+                        :
+                        <>
+                            <div className='project-config__content_vis-result__title'>
+                                { actualGraficType ? 
+                                    <span/> // discription or title if necessary
+                                    : "Выберете график"}
+                            </div>
+                            <div className='project-config__content_vis-result__img-container'>
+                                {
+                                    actualGraficType ?
+                                        <img id="image-g" alt="Выберите график" className='project-config__content_vis-result__img-container_img' src={imgSrc}/>
+                                        : <span/>
+                                }
+                            </div>
+                        </>
+                    }           
                     { downloadButton_sm }
                 </div>
             </div>
@@ -187,10 +181,11 @@ export function Visualization() {
 
 
 function GraficTypeSelector() {
-    const list = graficTypes.map((x) => {
+    const list = graficTypes.map((x, index) => {
         return (
             <GraphButton
                 graph={x}
+                key={index}
             />
         )
     })
@@ -204,17 +199,18 @@ function GraficTypeSelector() {
 
 function GraphButton(props) {
     const {graph} = props;
-
-    console.log(useSelector((state) => state.visualizationData))
     const dispatch = useDispatch();
     const features = useSelector((state) => state.projectData.features);
-    const default_column_name = features ? features[0] : null;
+    const features_original = useSelector((state) => state.projectData.features_original);
+    const active_file_type = useSelector((state) => state.projectData.active_file_type);
+    const columns = active_file_type === 'original' ? features_original : features;
+    const default_column_name = columns ? columns[0] : null;
     const column_name = useSelector((state) => state.visualizationData.column_name);
-    const column = column_name ? column_name : default_column_name;
+    const celected_column = column_name ? column_name : default_column_name;
 
     const handleChooseTypeByID = (e) => {
         dispatch(setVisualizationType(graph.id));
-        dispatch(getPicture(column))
+        dispatch(fetchVisualization(celected_column));
     }
 
     return (
@@ -244,9 +240,13 @@ function GraphButton(props) {
     )
 }
 
-function GraficSettings(props) {
+function GraficSettings() {
     const id = useSelector((state) => state.visualizationData.id);
-    const columns = useSelector((state) => state.projectData.features);
+    const features = useSelector((state) => state.projectData.features);
+    const features_original = useSelector((state) => state.projectData.features_original);
+    const active_file_type = useSelector((state) => state.projectData.active_file_type);
+    const columns = active_file_type === 'original' ? features_original : features;
+
     function getSettingsByID(id) {
         switch (id) {
             case "1":
@@ -308,7 +308,7 @@ function SelectColumn(props) {
     const dispatch = useDispatch();
 
     const handleChange = (e) => {
-        dispatch(getPicture(e.target.value));
+        dispatch(fetchVisualization(e.target.value));
     } 
     
     return (

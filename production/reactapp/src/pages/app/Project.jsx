@@ -4,7 +4,7 @@ import { useLoaderData } from "react-router-dom";
 import { ProjectConfig } from "../../components/app/ProjectConfiguration";
 import { ProcessingSettings } from "../../components/app/ProcessingSettings";
 import { Visualization } from "../../components/app/Visualization";
-import { fetchProject, fetchProjectTaskStatus } from "../../redux/projectData";
+import { fetchProject, fetchProjectTaskStatus, setOriginalFile, setProcessedFile } from "../../redux/projectData";
 import { Loader } from "../../components/optional/Loader";
 
 export const OneProjectLoader = async ({request, params}) => {
@@ -20,23 +20,30 @@ function Project() {
     const dispatch = useDispatch();
     const projectStatus = useSelector((state) => state.projectData.status);
     const projectTaskStatus = useSelector((state) => state.projectData.task_status);
+    const visualizationStatus = useSelector((state) => state.visualizationData.status);
     const [isLoading, setloading] = useState(true);
     const isProcessed = useSelector((state) => state.projectData.processed_csv_file_name) ? true : false;
-    const initialIndexState = isProcessed ? 1 : 0;
+    let initialIndexState;
+    if(isProcessed){
+        initialIndexState = 1;
+    } else {
+        initialIndexState = 0;
+    }
     const [activeIndex, setActiveIndex] = useState(initialIndexState);
     const [isProcessingDisable, setIsProcessingDisable] = useState(true);
 
+    console.log(visualizationStatus);
     useEffect(() => {
         if(projectTaskStatus === 'idle'){
             dispatch(fetchProjectTaskStatus(id))
         }
-        if(projectStatus === 'loading' || projectTaskStatus === 'loading') {
+        if(projectStatus === 'loading' || projectTaskStatus === 'loading' || visualizationStatus === 'loading') {
             setloading(true);
         }
-        if(projectStatus === 'succeeded' && projectTaskStatus === 'succeeded') {
+        if(projectStatus === 'succeeded' && projectTaskStatus === 'succeeded' && (visualizationStatus === 'succeeded' || visualizationStatus === 'idle')) {
             setloading(false);
         }
-    }, [projectStatus, projectTaskStatus, dispatch, activeIndex, id])
+    }, [dispatch, projectStatus, projectTaskStatus, activeIndex, id, visualizationStatus])
 
     useEffect(()=>{
         if(activeIndex === 1){

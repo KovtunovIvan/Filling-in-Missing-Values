@@ -15,7 +15,7 @@ export const fetchProjectTaskStatus = createAsyncThunk('project/fetchProjectTask
     let response = await checkTaskStatus(id);
     while (response.data.status === "PENDING"){
       response = await checkTaskStatus(id);
-      setTimeout(1000);
+      setTimeout(2000);
     }
     return response;
   } catch (err) {
@@ -32,6 +32,11 @@ const initialState  = {
   original_csv_file_name	: null,
   processed_csv_file_name: null,
   features: null,
+  features_original: null,
+  active_file_type: 'idle',//original or processed
+  original_num_rows: null, //integer
+  recommended_methods: null, //array of strings
+  has_missing_values: null, //boolean
   status: 'idle',
   task_status: 'idle',
 }
@@ -48,11 +53,22 @@ const projectData = createSlice({
           state.processed_csv_file_url = action.payload.processed_csv_file_url;
           state.original_csv_file_name = action.payload.original_csv_file_name;
           state.processed_csv_file_name = action.payload.processed_csv_file_name;
+          state.features_original = action.payload.features_original;
           state.features = action.payload.features;
+          state.original_num_rows = action.payload.original_num_rows;
+          state.recommended_methods = action.payload.recommended_methods;
+          state.has_missing_values = action.payload.has_missing_values;
+          if(action.payload.processed_csv_file_url) {
+            state.active_file_type = 'processed';
+          } else {
+            state.active_file_type = 'original';
+          }
         },
         resetProject: () => initialState,
         resetProjectTaskStatus: (state) => {state.task_status = 'idle'},
         resetProjectStatus: (state) => {state.status = 'idle'},
+        setOriginalFile: (state) => {state.active_file_type = 'original'},
+        setProcessedFile: (state) => {state.active_file_type = 'processed'},
     },
     extraReducers(builder) {
       builder
@@ -60,7 +76,6 @@ const projectData = createSlice({
           state.status = 'loading';
         })
         .addCase(fetchProject.fulfilled, (state, action) => {
-          state.status = 'succeeded';
           state.id = action.payload.id;
           state.title = action.payload.title;
           state.user = action.payload.user;
@@ -68,7 +83,17 @@ const projectData = createSlice({
           state.processed_csv_file_url = action.payload.processed_csv_file_url;
           state.original_csv_file_name = action.payload.original_csv_file_name;
           state.processed_csv_file_name = action.payload.processed_csv_file_name;
+          state.features_original = action.payload.features_original;
           state.features = action.payload.features;
+          state.original_num_rows = action.payload.original_num_rows;
+          state.recommended_methods = action.payload.recommended_methods;
+          state.has_missing_values = action.payload.has_missing_values;
+          if(action.payload.processed_csv_file_url) {
+            state.active_file_type = 'processed';
+          } else {
+            state.active_file_type = 'original';
+          }
+          state.status = 'succeeded';
         })
         .addCase(fetchProject.rejected, (state, action) => {
           state.status = 'failed';
@@ -88,4 +113,4 @@ const projectData = createSlice({
 });
 
 export default projectData.reducer;
-export const { setProject, resetProject, resetProjectTaskStatus, resetProjectStatus } = projectData.actions;
+export const { setProject, resetProject, resetProjectTaskStatus, resetProjectStatus, setOriginalFile, setProcessedFile } = projectData.actions;
