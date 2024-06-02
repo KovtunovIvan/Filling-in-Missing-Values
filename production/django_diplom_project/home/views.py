@@ -57,6 +57,9 @@ from django.http import StreamingHttpResponse
 import time
 from .tasks import process_large_data
 from celery.result import AsyncResult
+from .serializers import LogoutSerializer
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 class RegistrationAPIView(GenericAPIView):
@@ -111,6 +114,7 @@ class IdGetUser(GenericAPIView):
 class UserLogoutAPIView(GenericAPIView):
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = LogoutSerializer
 
     def post(self, request, *args, **kwargs):
         try:
@@ -124,10 +128,6 @@ class UserLogoutAPIView(GenericAPIView):
 
 
 class UserAPIView(RetrieveUpdateAPIView):
-    """
-    Get, Update user information
-    """
-
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
 

@@ -1,10 +1,7 @@
-import os
 from celery import shared_task
-
-from django_diplom_project import settings
 from .models import Project
 import pandas as pd
-from io import BytesIO, StringIO
+from io import BytesIO
 from fill_methods.CatBoostRegressor_fill import CatBoostRegressor_imputer
 from fill_methods.DecisionTreeRegressor_fill import DecisionTree_imputer
 from fill_methods.interpolate_fill import interpolate_fill
@@ -20,7 +17,6 @@ from fill_methods.XGBRegressor_fill import XGBRegressor_imputer
 from scaling_methods.scaler_standart import scaling_standart
 from scaling_methods.scaler_normalize import normalization_scale
 from .encoder import data_encoding
-from django.http import FileResponse, HttpResponse
 
 
 @shared_task

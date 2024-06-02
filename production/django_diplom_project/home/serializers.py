@@ -5,6 +5,9 @@ from .models import Project
 from celery.result import AsyncResult
 
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
 class UserSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
 

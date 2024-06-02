@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "home",
     "django_extensions",
     "sslserver",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
