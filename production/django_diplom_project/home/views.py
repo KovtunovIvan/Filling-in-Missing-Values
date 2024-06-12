@@ -208,7 +208,6 @@ def get_project(request, project_id):
             original_data_path = project.original_csv_file.path
 
         if original_data_path and os.path.exists(original_data_path):
-            # Если файл существует на сервере, читаем его и получаем список признаков
             try:
                 delimiter = detect_delimiter(original_data_path)
                 df_original = pd.read_csv(original_data_path, delimiter=delimiter)
@@ -377,8 +376,7 @@ def correlation_matrix_view(request, project_id, file_type):
                 return JsonResponse(
                     {
                         "message": f"{missing_values_message}\n{categorical_features_message}\nВизуализация невозможна, необходимо обработать данные."
-                    },
-                    status=400,
+                    }
                 )
 
             # Проверяем, существует ли уже визуализация с таким project_id и file_type
@@ -461,16 +459,14 @@ def normal_distribution_view(request, project_id, feature_name, file_type):
             return JsonResponse(
                 {
                     "message": f"Обнаружены пропущенные значения в признаке '{feature_name}'. Визуализация невозможна, необходимо обработать данные."
-                },
-                status=400,
+                }
             )
 
         if df[feature_name].dtype == "object":
             return JsonResponse(
                 {
                     "message": f"Признак '{feature_name}' является категориальным. Визуализация невозможна, необходимо обработать данные."
-                },
-                status=400,
+                }
             )
 
         visualization = Visualization.objects.filter(
@@ -560,16 +556,14 @@ def box_plot_view(request, project_id, feature_name, file_type):
             return JsonResponse(
                 {
                     "message": f"Обнаружены пропущенные значения в признаке {feature_name}. Визуализация невозможна, необходимо обработать данные."
-                },
-                status=400,
+                }
             )
 
         if df[feature_name].dtype == "object":
             return JsonResponse(
                 {
                     "message": f"Признак {feature_name} является категориальным. Визуализация невозможна."
-                },
-                status=400,
+                }
             )
 
         plt.figure(figsize=(10, 8))
