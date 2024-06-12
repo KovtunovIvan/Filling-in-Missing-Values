@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-
+from django import forms
+from .models import Project
 from .models import User
 
 class CustomUserCreationForm(UserCreationForm):
@@ -11,3 +12,10 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
         fields = ("email",)
+
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ['original_csv_file']
+
+        

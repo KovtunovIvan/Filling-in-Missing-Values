@@ -1,0 +1,7 @@
+<svg width="15" height="64" viewBox="0 0 15 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M7.5 64C3.35786 64 4.4478e-07 60.6421 6.25839e-07 56.5C8.06897e-07 52.3579 3.35786 49 7.5 49C11.6421 49 15 52.3579 15 56.5C15 60.6421 11.6421 64 7.5 64Z" fill="#41D1AF"/>
+<ellipse cx="7.5" cy="14.5" rx="2.5" ry="2.5" transform="rotate(90 7.5 14.5)" fill="#3171C1"/>
+<ellipse cx="7.5" cy="2.5" rx="2.5" ry="2.5" transform="rotate(90 7.5 2.5)" fill="#3171C1"/>
+<ellipse cx="7.5" cy="26.5" rx="2.5" ry="2.5" transform="rotate(90 7.5 26.5)" fill="#3171C1"/>
+<ellipse cx="7.5" cy="38.5" rx="2.5" ry="2.5" transform="rotate(90 7.5 38.5)" fill="#3171C1"/>
+</svg>

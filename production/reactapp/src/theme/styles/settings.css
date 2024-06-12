@@ -1,0 +1,18 @@
+.ui-settings_wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.ui-settings__content{
+  color: var(--main-headline-color);
+  font-size: 32px;
+  font-weight: 700;
+}
+
+@media (max-width: 1200px) {
+  .ui-settings_wrapper{
+    padding-top: 85px;
+  }
+}

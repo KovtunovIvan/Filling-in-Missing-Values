@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     "rest_auth",  # авторизации через rest
     "corsheaders",  # cors для парса путей и подключения фронта и бэка
     "home",
+    "django_extensions",
+    "sslserver",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
@@ -133,7 +136,7 @@ SIMPLE_JWT = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "todo_app",
+        "NAME": "web_app",
         "USER": "diplom_user",
         "PASSWORD": "diplom123",
         "HOST": "127.0.0.1",
@@ -182,3 +185,28 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Настройки для обработки загруженных файлов проектов
+ORIGINAL_CSV_FILES_DIR = "original_csv_files/"
+PROCESSED_CSV_FILES_DIR = "processed_csv_files/"
+AVATARS_DIR = "avatars/"
+PROJECT_PLOTS_DIR = "project_plots/"
+
+# Настройки SMTP сервера для отправки электронной почты
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.mail.ru"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "medmindes@mail.ru"
+EMAIL_HOST_PASSWORD = "pX6vczzPuTyKWcRTrR4F"
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

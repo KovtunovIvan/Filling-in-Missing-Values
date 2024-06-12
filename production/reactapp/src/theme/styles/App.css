@@ -1,0 +1,99 @@
+:root {
+  --main-bg-color:linear-gradient(#F5FAFF, #D7E9FF);;
+  --default-color: #3171C1;
+  --accent-color: #41D1AF;
+  --main-lg: linear-gradient(#41D1AF, #3171C1);
+  --main-headline-color:#06004A;
+  --main-text-color: #202832;
+  --lable-color: #425667;
+  --input-border-color: #B7CAE3;
+  --default-hover-color:#1E5BA6;
+  --footer-size: 145px;
+  --error-color: #E23636;
+  --disable-color: #AFAFAF;
+  --navitem--focus--color: #CBE2F6;
+}
+
+body {
+  box-sizing: border-box;
+}
+
+
+.line {
+padding-top: 6px;
+}
+
+.content {
+  position: relative;
+  min-height: 100%;
+  background: var(--main-bg-color);
+}
+
+.content_outlet{
+  padding-top: 80px;
+}
+
+.wrapper {
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Медиа-запрос для больших экранов */
+@media (min-width: 1170px) {
+  .wrapper {
+      max-width: 1170px;
+  }
+}
+
+
+.button {
+  font-weight: 500;
+  padding: 15px 20px 15px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  flex-basis: content;
+  align-self: flex-start;
+}
+
+.button_disable {
+  background-color: var(--disable-color);
+  color: white;
+}
+
+.button_default{
+  background-color: var(--default-color);
+  color: white;
+}
+
+.button_default:hover, 
+.button_lite:hover {
+  color: white;
+  background-color: var(--default-hover-color);
+  transition: all 0.3s;
+  border-color: var(--default-hover-color);
+}
+
+.button_dark-mode{
+  color: white;
+  border: 2px solid white;
+  padding: 13px 18px;
+}
+
+.button_dark-mode:hover {
+  background-color: var(--default-hover-color);
+  border-color: var(--default-hover-color);
+  transition: all 0.3s;
+}
+
+.button_lite{
+  color: var(--default-hover-color);
+  border: 2px solid var(--default-hover-color);
+  padding: 13px 18px 13px 18px;
+  background: none;
+  font-weight: 500;
+}

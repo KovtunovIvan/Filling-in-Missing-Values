@@ -1,66 +1,52 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-
-import './theme/App.css';
-
-import { userCheck } from "./api/userApi"
-import { setUser } from "./redux/userData";
-import { LocalStorageTools } from "./localStorage";
-
+import './theme/styles/App.css';
+import './theme/styles/guide.css';
+import './theme/styles/projects-list.css';
+import './theme/styles/project.css';
+import './theme/styles/main-form.css';
+import './theme/styles/app-sidebar.css';
+import './theme/styles/root.css';
+import './theme/styles/settings.css';
+import './theme/styles/profile.css';
+import './theme/styles/footer.css';
+import './theme/styles/success-main-submit.css';
+import './theme/styles/modal.css';
+import './theme/styles/loader.css';
+import './theme/styles/error404.css';
+import './theme/styles/rejected.css';
 import { PrivateRoute } from "./routes/PrivateRoute";
 import { GuestRoute } from "./routes/GuestRoute";
-
-import { MainLayout } from './components/MainLayout';
-import { AppLayout } from './components/AppLayout';
-
+import { MainLayout } from './components/main/MainLayout';
+import { AppLayout} from './components/app/AppLayout';
 import { Root } from './pages/root/Root';
 import { Contacts } from './pages/platform/Contacts';
 import { Guide } from './pages/platform/Guide';
-import { Feedback } from './pages/platform/Feedback';
-import { PresentationOrder } from './pages/platform/PresentationOrder';
+import { Feedback, sendFeedbackFormData } from './pages/platform/Feedback';
+import { PresentationOrder, sendPresFormData } from './pages/platform/PresentationOrder';
 import { LogIn } from './pages/u/LogIn';
 import { Registration } from './pages/u/Registration';
 import { Demo } from './pages/platform/Demo';
-import { CreateProject } from './pages/app/CreateProject';
+import { CreateProject } from './pages/app/CreateNewProject';
 import { AllProjects } from "./pages/app/AllProjects";
 import { Settings } from "./pages/app/Settings";
 import { PasswordResore } from "./pages/u/PasswordRestore";
-import { Profile } from "./pages/app/Profile";
-import { Project } from "./pages/app/Project";
+import { Profile, sendProfileFormData } from "./pages/app/Profile";
+import { OneProjectLoader, Project } from "./pages/app/Project";
+import { sendFormData } from "./components/app/ProcessingSettings";
+import { giudeChildrenRoutes } from "./pages/platform/Guide"
+import { NotFoundPage } from "./pages/optional/error404";
 
-import ErrorPage from './components/ErrorPage';
 
 function App() {
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.userData.username);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const tokens = LocalStorageTools.getItemFromLocalStorage('tokens')
-        const userInfo = tokens ? jwtDecode(tokens.access) : null;
-        if (userInfo) {
-          userCheck(userInfo.user_id).then((response) => {
-            dispatch(setUser(response?.data))
-          })
-        }
-      } catch (err) {
-        console.log(`Error! Unable to check tokens! ${err}`);
-      }
-    })()
-  }, [])
-
   const router = createBrowserRouter([
     {
       path: "/",
       element: <Root/>,
+      errorElement: <NotFoundPage/>
     },
     {
       path:"/platform",
       element: <MainLayout/>,
-      errorElement: <ErrorPage/>,
       children: [
         {
           index:true,
@@ -70,14 +56,17 @@ function App() {
         {
           path:"guide",
           element:<Guide/>,
+          children: giudeChildrenRoutes,
         },
         {
           path:"feedback",
           element:<Feedback/>,
+          action: sendFeedbackFormData,
         },
         {
           path:"presentation",
           element:<PresentationOrder/>,
+          action: sendPresFormData,
         },
         {
           path:"demo",
@@ -88,11 +77,10 @@ function App() {
     {
       path: "/u",
       element: (
-      <GuestRoute user={user}>
+      <GuestRoute>
         <MainLayout/>
       </GuestRoute>
       ),
-      errorElement: <ErrorPage/>,
       children: [
         {
           path:"login",
@@ -110,15 +98,15 @@ function App() {
     },
     {
       path:"/app",
-      errorElement: <ErrorPage/>,
       element:(
-        <PrivateRoute user={user}>
+        <PrivateRoute>
           <AppLayout/>
         </PrivateRoute>
       ),
       children: [
         {
-          index: true,
+          index:true,
+          path: "create",
           element:<CreateProject/>,
         },
         {
@@ -128,10 +116,13 @@ function App() {
         {
           path:"projects/:id",
           element:<Project/>,
+          loader: OneProjectLoader,
+          action: sendFormData,
         },
         {
           path:"profile",
           element:<Profile/>,
+          action: sendProfileFormData,
         },
         {
           path:"settings",
@@ -142,6 +133,7 @@ function App() {
   ])
 
   /*
+  // react router old version
   const router2 = createBrowserRouter(
     createRoutesFromElements(
         <Route path='/' element={<Outlet/>} >

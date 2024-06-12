@@ -1,0 +1,65 @@
+/* ----------MAIN-CONTACTS---------- */ 
+
+.contacts-container{
+  box-sizing: border-box;
+  background-color: white;
+  min-height: 100%;
+  padding: 30px 50px 50px 50px;
+  z-index:1;
+  position:relative;
+}
+
+.contacts-container__main-title{
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--main-headline-color);
+}
+
+.contacts__buttons-wrapper{
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.contacts__buttons__single-button{
+  margin-right: 10px;
+  margin-top: 10px;
+}
+
+.contacts__blok-wrapper{
+  padding: 20px 0 0 0;
+}
+
+.contacts__blok-wrapper__title{
+  font-size: 26px;
+  font-weight: bold;
+  color: var(--main-headline-color);
+  margin-top: 10px;
+}
+
+.contacts__blok__content {
+  display: grid;
+  padding: 0 0 20px 0;
+}
+
+
+.contacts__blok__content__subtitle{
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--main-headline-color);
+  padding: 20px 0 0 0;
+}
+
+.contacts__blok__content__name{
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--main-text-color);
+  padding: 12px 0 0 0;
+}
+
+.contacts__blok__content__contact-info{
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--default-color);
+  padding: 10px 0 0 20px;
+}
