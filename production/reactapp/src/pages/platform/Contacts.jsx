@@ -26,10 +26,6 @@ const contact4 = {
     data: "ictis.sfedu.ru",
 };
 
-// const contact5 = {
-//     name: "— CVisionLab",
-//     data: "cvisionlab.com",
-// }; 
 
 export function Contacts() {
     return (

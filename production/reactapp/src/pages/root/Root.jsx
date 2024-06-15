@@ -18,6 +18,8 @@ import step_line_img_vertical  from '../../theme/img/main/step_vertical.svg';
 import start_using_picture from '../../theme/img/main/start-using.png';
 import start_using_logo from '../../theme/img/main/start-using-logo.svg';
 
+import ReactPlayer from 'react-player/youtube'
+
 
 const steps = [
     "Интеграция с источниками данных",
@@ -126,12 +128,9 @@ function ShowVideo(){
             <div className='root__show-video__headline2'>
                 и оцените, подойдет ли вам наше решение
             </div>
-            {
-                // <div className='root__show-video__content'>
-
-                // </div>
-            }
-            <div className='test' style={{textAlign: 'center'}}> Здесь должно быть видео</div>
+            <div className='root__show-video__video'>
+                <ReactPlayer controls={true} light={true} url='https://youtu.be/xNyBmQOhX9Q' />
+            </div>
         </>
     )
 }

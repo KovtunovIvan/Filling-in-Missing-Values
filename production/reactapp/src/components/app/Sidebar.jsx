@@ -151,7 +151,7 @@ export function Sidebar() {
                                         
                                 </div> 
                             </Link>
-                            <Link to='#' className='app-link'>
+                            <Link to='/platform/demo' className='app-link'>
                                     <div className='app-sidebar__navbar__item'>
                                         <img 
                                             className='app-sidebar__navbar__item__icon'

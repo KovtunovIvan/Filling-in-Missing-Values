@@ -1,4 +1,5 @@
 .footer-wrapper{
+  box-sizing: border-box;
   background-image: url("../img/main/back.png");
   padding: 10px 16px 10px 16px;
   height: fit-content;

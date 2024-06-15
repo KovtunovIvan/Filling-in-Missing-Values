@@ -229,7 +229,6 @@ function Lable(props) {
         handleHideMenu();
     }
 
-    //const path = id === 0 ? "/platform/guide/" : `/platform/guide/${id}`;
 
     return (
         <div>

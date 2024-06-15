@@ -36,7 +36,6 @@ export function ProjectConfig(props) {
     const dispatch = useDispatch();
     const handleChangeActive = (e) => {
         const index = Number(e.target.id);
-        console.log(index)
         setter(index);
         if(index === 1){
             dispatch(setProcessedFile());

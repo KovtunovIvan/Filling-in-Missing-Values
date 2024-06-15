@@ -55,6 +55,11 @@ const ServerErrorModal = {
     msg: "Пожалуйста, перезагрузите страницу или спустя 1-2 минуты попробуйте снова.",
 };
 
+const SizeFileErrorModal = {
+    title: "Внимание!",
+    msg: "Пожалуйста, выберите файл размером не более 10МБ.",
+};
+
 const InvalidPasswordModal = {
     title: " Ошибка!",
     msg: (<>Пароль неверный.<br/>Введите корректный пароль.</>),
@@ -125,8 +130,13 @@ function AvatarSettings() {
                     if(msg === "OK"){
                         dispatch(fetchUser());
                     } else {
-                        setModelContent(ServerErrorModal);;
-                        setModalActive(true);
+                        if(msg === "file size exceeds 10MB"){
+                            setModelContent(SizeFileErrorModal);
+                            setModalActive(true);
+                        } else {
+                            setModelContent(ServerErrorModal);;
+                            setModalActive(true);
+                        }
                     }
                     break;
                 //Удалить аватар
@@ -790,6 +800,12 @@ export const sendProfileFormData = async ({params, request}) => {
     if (intent === "add_avatar") {
         const selectedFile = document.getElementById("upload-avatar").files[0];
         let newFormData =  new FormData();
+        if(selectedFile['size'] > 10485760){
+            return {
+                intent: intent,
+                msg: "file size exceeds 10MB"
+            }
+        }
         newFormData.append("avatar", selectedFile)
         const response = await uploadAvatar(newFormData).then(
             (response) => {

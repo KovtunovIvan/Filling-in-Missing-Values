@@ -25,18 +25,19 @@ padding-top: 6px;
 
 .content {
   position: relative;
-  min-height: 100%;
+  height: 100%;
+  width: 100%;
   background: var(--main-bg-color);
 }
 
 .content_outlet{
   padding-top: 80px;
+  width: 100%;
 }
 
 .wrapper {
   max-width: 90%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
 /* Медиа-запрос для больших экранов */

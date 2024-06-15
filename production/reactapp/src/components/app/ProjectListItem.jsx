@@ -97,7 +97,7 @@ export function ProjectListItem(props) {
                         onClick={handleClickOptions}
                     />
                     {
-                        isActiveBox ?
+                        isActiveBox && status !== 'PENDING'?
                         <div 
                             ref={boxRef}
                             className="project-list__item__options__box"

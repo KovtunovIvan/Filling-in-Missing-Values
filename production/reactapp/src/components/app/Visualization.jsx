@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import {useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchVisualization, setVisualizationType } from '../../redux/visualizationData';
+import { fetchVisualization, resetVisualisation, setVisualizationType } from '../../redux/visualizationData';
 import matrixIcon from "../../theme/img/visualization/matrix-icon.svg"
 import nornDistibutionIcon from "../../theme/img/visualization/norm-distribution-icon.svg"
 import boxBlotIcon from "../../theme/img/visualization/box-plot-icon.svg"
@@ -35,6 +35,7 @@ export function Visualization() {
         switch (id) {
             case "1":
                 setActiveIndex(1);
+                
                 break;
             default:
                 setActiveIndex(0);
@@ -108,9 +109,10 @@ export function Visualization() {
                             <div className="project-config__optional">
                                 Наличие пропусков:  <span className="project-config__optional__value">{has_missing_values ? "да" : "нет"}</span>
                             </div>
+                            { has_missing_values &&
                             <div className="project-config__optional">
                                 Рекомендованные методы: <span className="project-config__optional__value">{recommended_methods ? recommended_methods.join(", ") : "нет"}</span>
-                            </div>
+                            </div> } 
                         </>
                     }
                 
@@ -159,7 +161,7 @@ export function Visualization() {
                         <>
                             <div className='project-config__content_vis-result__title'>
                                 { actualGraficType ? 
-                                    <span/> // discription or title if necessary
+                                    <span/> 
                                     : "Выберете график"}
                             </div>
                             <div className='project-config__content_vis-result__img-container'>

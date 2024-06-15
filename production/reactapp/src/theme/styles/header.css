@@ -50,8 +50,10 @@
 
 @media screen and (max-width: 850px){
   .header-body{
+    box-sizing: border-box;
     justify-content: space-between;
     height: 55px;
+    width: 100%;
   }
   .content_outlet { 
     padding-top: 55px;
@@ -59,7 +61,7 @@
   .header__burger-icon {
     display: block;
     position: relative;
-    right: 50px;
+    margin-right: 20px;
     padding: 8px;
   }
   .header__burger-icon_active{

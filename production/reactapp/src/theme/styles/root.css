@@ -476,7 +476,11 @@
   border-bottom: 4px solid transparent;
 }
 
-
+.root__show-video__video {
+  display: flex;
+  justify-content: center;
+  
+}
 @media screen and (max-width: 1000px){
   .root__start-using__head__picture{
     width: 35%;

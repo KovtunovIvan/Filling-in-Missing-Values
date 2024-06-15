@@ -8,7 +8,7 @@ import { SuccessfulSubmitWindow } from '../../components/main/SuccessfulSubmitWi
 const EMAIL_REGEXP = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 const PHONE_NUMBER_REGEXP = /^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/
 
-const infoText = "Наши специалисты расскажут о возможностях аналитической платформы MedMinds применительно для вашего бизнеса."
+const infoText = "Наши специалисты расскажут о возможностях аналитической платформы MedMindes применительно для вашего бизнеса."
 
 export const sendPresFormData = async ({params, request}) => {
     let formData = await request.formData();
