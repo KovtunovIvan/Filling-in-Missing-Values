@@ -41,7 +41,7 @@ export const sendDataForProcessing = async (formData) => {
 
 
 export const getFileByUrl = async (url) => {
-  const path = `http://127.0.0.1:8000/${url}/`;
+  const path = `https://127.0.0.1:8000/${url}/`;
   window.open(path);
 }
 
